@@ -1,4 +1,4 @@
-import type { AuthResponse } from "./types";
+import type { AuthResponse, UserProfileResponse } from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
 const TOKEN_KEY = "habit_jwt";
@@ -13,6 +13,16 @@ export function getToken(): string | null {
 
 export function clearToken(): void {
   sessionStorage.removeItem(TOKEN_KEY);
+}
+
+export function resolveAssetUrl(url: string | null): string | null {
+  if (!url) {
+    return null;
+  }
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+  return `${API_BASE_URL}${url.startsWith("/") ? "" : "/"}${url}`;
 }
 
 export async function telegramAuth(initData: string): Promise<AuthResponse> {
@@ -42,7 +52,10 @@ export async function devAuth(telegramId: number, firstName: string, username: s
 export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
   const token = getToken();
   const headers = new Headers(init?.headers ?? {});
-  headers.set("Content-Type", "application/json");
+  const isFormData = init?.body instanceof FormData;
+  if (!isFormData) {
+    headers.set("Content-Type", "application/json");
+  }
   if (token) {
     headers.set("Authorization", `Bearer ${token}`);
   }
@@ -59,4 +72,24 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
     return undefined as T;
   }
   return response.json() as Promise<T>;
+}
+
+export function getMyProfile(): Promise<UserProfileResponse> {
+  return apiRequest<UserProfileResponse>("/api/users/me");
+}
+
+export function updateMyLanguage(language: "ru" | "en"): Promise<UserProfileResponse> {
+  return apiRequest<UserProfileResponse>("/api/users/language", {
+    method: "PATCH",
+    body: JSON.stringify({ language })
+  });
+}
+
+export function uploadMyAvatar(file: File): Promise<UserProfileResponse> {
+  const formData = new FormData();
+  formData.append("file", file);
+  return apiRequest<UserProfileResponse>("/api/users/avatar", {
+    method: "POST",
+    body: formData
+  });
 }

@@ -1,27 +1,34 @@
 import { Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "./auth";
 import { ActivityPage } from "./pages/ActivityPage";
 import { HabitFormPage } from "./pages/HabitFormPage";
 import { HabitStatsPage } from "./pages/HabitStatsPage";
 import { HomePage } from "./pages/HomePage";
+import { ProfilePage } from "./pages/ProfilePage";
+import { SkeletonCard } from "./components/Skeleton";
 
 function Navigation() {
   const location = useLocation();
+  const { t } = useTranslation();
   const itemClass = (active: boolean) =>
-    `tap flex-1 rounded-2xl px-4 py-2.5 text-center text-sm font-semibold transition-all duration-200 ${
-      active ? "bg-white text-ink shadow-md" : "text-slate-500"
+    `tap flex-1 rounded-2xl px-3 py-2 text-center text-sm font-semibold transition-all duration-200 ${
+      active ? "bg-white/90 text-ink" : "text-slate-500"
     }`;
 
   return (
-    <nav className="glass-card sticky top-3 z-20 flex items-center gap-2 p-2">
+    <nav className="glass-card sticky top-3 z-20 flex items-center gap-1.5 border-white/60 p-1.5 shadow-sm">
       <Link className={itemClass(location.pathname === "/")} to="/">
-        Today
+        {t("today")}
       </Link>
       <Link className={itemClass(location.pathname.startsWith("/activity"))} to="/activity">
-        Feed
+        {t("feed")}
       </Link>
       <Link className={itemClass(location.pathname.startsWith("/habits/new"))} to="/habits/new">
-        Create
+        {t("create")}
+      </Link>
+      <Link className={itemClass(location.pathname.startsWith("/profile"))} to="/profile">
+        {t("profile")}
       </Link>
     </nav>
   );
@@ -30,28 +37,31 @@ function Navigation() {
 function FullState({ text, error = false }: { text: string; error?: boolean }) {
   return (
     <div className="mx-auto flex min-h-screen max-w-md items-center justify-center px-4">
-      <div className={`glass-card w-full px-6 py-8 text-center text-sm ${error ? "text-rose-600" : "text-slate-500"}`}>
-        {text}
-      </div>
+      {error ? (
+        <div className="glass-card w-full px-6 py-8 text-center text-sm text-rose-600">{text}</div>
+      ) : (
+        <div className="w-full space-y-3">
+          <SkeletonCard />
+          <p className="text-center text-sm text-slate-500">{text}</p>
+        </div>
+      )}
     </div>
   );
 }
 
 export default function App() {
+  const { t } = useTranslation();
   const { ready, isAuthenticated, error } = useAuth();
 
-  if (!ready) return <FullState text="Preparing your mini app..." />;
+  if (!ready) return <FullState text={t("loadingSession")} />;
   if (error) return <FullState text={error} error />;
-  if (!isAuthenticated) return <FullState text="Authentication failed" error />;
+  if (!isAuthenticated) return <FullState text={t("authFailed")} error />;
 
   return (
     <div className="mx-auto min-h-screen max-w-md px-4 pb-8 pt-4">
       <header className="mb-3 flex items-center justify-between">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Telegram Mini App</p>
-          <h1 className="text-2xl font-black text-ink">Habit Tracker</h1>
-        </div>
-        <div className="glass-card rounded-2xl px-3 py-2 text-xs font-semibold text-slate-500">Premium</div>
+        <h1 className="text-3xl font-black text-ink">{t("appTitle")}</h1>
+        <div className="rounded-full bg-ink px-3 py-1 text-[11px] font-bold text-white shadow-sm">{t("pro")}</div>
       </header>
 
       <Navigation />
@@ -63,6 +73,7 @@ export default function App() {
           <Route path="/habits/new" element={<HabitFormPage />} />
           <Route path="/habits/:id/edit" element={<HabitFormPage />} />
           <Route path="/habits/:id/stats" element={<HabitStatsPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

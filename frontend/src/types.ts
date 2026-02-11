@@ -47,3 +47,20 @@ export interface HabitStatsResponse {
   currentStreak: number;
   bestStreak: number;
 }
+
+export interface HabitCompletionResponse {
+  id: string;
+  date: string;
+  completed: boolean;
+  createdAt: string;
+}
+
+export interface UserProfileResponse {
+  id: string;
+  telegramId: number;
+  username: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  photoUrl: string | null;
+  language: "ru" | "en";
+}

@@ -38,6 +38,9 @@ public class UserEntity {
     @Column(name = "photo_url")
     private String photoUrl;
 
+    @Column(name = "language", nullable = false)
+    private String language;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 }

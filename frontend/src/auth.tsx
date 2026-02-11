@@ -21,9 +21,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const telegram = window.Telegram?.WebApp;
-    telegram?.ready();
-    telegram?.expand();
+    const telegram = (window as Window & { Telegram?: { WebApp?: { initData?: string; ready?: () => void; expand?: () => void } } })
+      .Telegram?.WebApp;
+    telegram?.ready?.();
+    telegram?.expand?.();
 
     const existing = getToken();
     if (existing) {

@@ -1,5 +1,13 @@
 interface TelegramWebApp {
   initData: string;
+  initDataUnsafe?: {
+    user?: {
+      language_code?: string;
+    };
+  };
+  HapticFeedback?: {
+    impactOccurred(style: "light" | "medium" | "heavy"): void;
+  };
   ready(): void;
   expand(): void;
 }

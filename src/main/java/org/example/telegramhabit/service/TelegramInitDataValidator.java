@@ -63,7 +63,8 @@ public class TelegramInitDataValidator {
                     asText(node, "username"),
                     asText(node, "first_name"),
                     asText(node, "last_name"),
-                    asText(node, "photo_url")
+                    asText(node, "photo_url"),
+                    normalizeLanguage(asText(node, "language_code"))
             );
         } catch (Exception ex) {
             throw new IllegalArgumentException("Invalid Telegram user payload");
@@ -116,6 +117,24 @@ public class TelegramInitDataValidator {
         return value == null || value.isNull() ? null : value.asText();
     }
 
-    public record TelegramUserData(Long telegramId, String username, String firstName, String lastName, String photoUrl) {
+    private String normalizeLanguage(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return "en";
+        }
+        String lang = raw.toLowerCase();
+        return switch (lang) {
+            case "ru", "en" -> lang;
+            default -> "en";
+        };
+    }
+
+    public record TelegramUserData(
+            Long telegramId,
+            String username,
+            String firstName,
+            String lastName,
+            String photoUrl,
+            String language
+    ) {
     }
 }

@@ -40,10 +40,15 @@ public class HabitCompletionService {
                     return newCompletion;
                 });
 
+        // Idempotent completion: repeated tap for the same day should not create duplicate activity events.
+        if (completion.isCompleted()) {
+            return toResponse(completion);
+        }
+
         completion.setCompleted(true);
         completionRepository.save(completion);
 
-        activityService.log(user, habit, ActivityType.COMPLETED, "Completed habit: " + habit.getTitle());
+        activityService.log(user, habit, ActivityType.COMPLETED, completedMessage(user, habit));
         emitStreakEvents(user, habit);
         return toResponse(completion);
     }
@@ -75,10 +80,35 @@ public class HabitCompletionService {
         int current = streakService.currentStreak(habit);
         int best = streakService.bestStreak(habit);
         if (habit.getType() == HabitType.DAILY && current > 0 && current % 7 == 0) {
-            activityService.log(user, habit, ActivityType.STREAK, current + " days streak for " + habit.getTitle());
+            activityService.log(user, habit, ActivityType.STREAK, streakMessage(user, habit, current));
         }
         if (current == best && current > 1) {
-            activityService.log(user, habit, ActivityType.RECORD, "New record: " + best + " for " + habit.getTitle());
+            activityService.log(user, habit, ActivityType.RECORD, recordMessage(user, habit, best));
         }
+    }
+
+    private String completedMessage(UserEntity user, HabitEntity habit) {
+        if (isRu(user)) {
+            return "Выполнена привычка: " + habit.getTitle();
+        }
+        return "Completed habit: " + habit.getTitle();
+    }
+
+    private String streakMessage(UserEntity user, HabitEntity habit, int current) {
+        if (isRu(user)) {
+            return "Серия " + current + " дней для " + habit.getTitle();
+        }
+        return current + " days streak for " + habit.getTitle();
+    }
+
+    private String recordMessage(UserEntity user, HabitEntity habit, int best) {
+        if (isRu(user)) {
+            return "Новый рекорд: " + best + " для " + habit.getTitle();
+        }
+        return "New record: " + best + " for " + habit.getTitle();
+    }
+
+    private boolean isRu(UserEntity user) {
+        return user.getLanguage() != null && user.getLanguage().equalsIgnoreCase("ru");
     }
 }
