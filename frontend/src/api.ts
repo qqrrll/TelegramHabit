@@ -1,0 +1,62 @@
+import type { AuthResponse } from "./types";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const TOKEN_KEY = "habit_jwt";
+
+export function setToken(token: string): void {
+  sessionStorage.setItem(TOKEN_KEY, token);
+}
+
+export function getToken(): string | null {
+  return sessionStorage.getItem(TOKEN_KEY);
+}
+
+export function clearToken(): void {
+  sessionStorage.removeItem(TOKEN_KEY);
+}
+
+export async function telegramAuth(initData: string): Promise<AuthResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/auth/telegram`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ initData })
+  });
+  if (!response.ok) {
+    throw new Error("Telegram auth failed");
+  }
+  return response.json() as Promise<AuthResponse>;
+}
+
+export async function devAuth(telegramId: number, firstName: string, username: string): Promise<AuthResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/auth/dev`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ telegramId, firstName, username })
+  });
+  if (!response.ok) {
+    throw new Error("Dev auth failed");
+  }
+  return response.json() as Promise<AuthResponse>;
+}
+
+export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = getToken();
+  const headers = new Headers(init?.headers ?? {});
+  headers.set("Content-Type", "application/json");
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  const response = await fetch(`${API_BASE_URL}${path}`, { ...init, headers });
+  if (!response.ok) {
+    if (response.status === 401) {
+      clearToken();
+    }
+    const errorText = await response.text();
+    throw new Error(errorText || `API error: ${response.status}`);
+  }
+  if (response.status === 204) {
+    return undefined as T;
+  }
+  return response.json() as Promise<T>;
+}

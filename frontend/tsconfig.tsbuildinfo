@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/api.ts","./src/auth.tsx","./src/main.tsx","./src/telegram.d.ts","./src/types.ts","./src/vite-env.d.ts","./src/pages/activitypage.tsx","./src/pages/habitformpage.tsx","./src/pages/habitstatspage.tsx","./src/pages/homepage.tsx"],"version":"5.9.3"}
