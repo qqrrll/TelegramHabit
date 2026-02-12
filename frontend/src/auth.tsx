@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { clearToken, devAuth, getToken, setToken, telegramAuth } from "./api";
+import { initTelegramApp } from "./telegram";
 
 interface AuthContextValue {
   ready: boolean;
@@ -21,10 +22,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const telegram = (window as Window & { Telegram?: { WebApp?: { initData?: string; ready?: () => void; expand?: () => void } } })
-      .Telegram?.WebApp;
-    telegram?.ready?.();
-    telegram?.expand?.();
+    initTelegramApp();
+    const telegram = (window as Window & { Telegram?: { WebApp?: { initData?: string } } }).Telegram?.WebApp;
 
     const existing = getToken();
     if (existing) {

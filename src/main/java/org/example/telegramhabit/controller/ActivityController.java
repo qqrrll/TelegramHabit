@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/** Returns personal activity feed for authenticated user. */
+/** Returns activity feed for authenticated user and their friends. */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/activity")

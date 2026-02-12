@@ -31,8 +31,12 @@ app:
     dev-auth-enabled: ${DEV_AUTH_ENABLED:true}
   telegram:
     bot-token: ${TELEGRAM_BOT_TOKEN:change-me}
+    bot-username: ${TELEGRAM_BOT_USERNAME:}
+    miniapp-short-name: ${TELEGRAM_MINIAPP_SHORT_NAME:}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173,http://localhost:5175,http://127.0.0.1:5175}
   storage:
     upload-dir: ${UPLOAD_DIR:uploads}
     avatar-base-url: ${AVATAR_BASE_URL:/uploads}
+  friends:
+    invite-base-url: ${FRIEND_INVITE_BASE_URL:http://localhost:5173/friends}

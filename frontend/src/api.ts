@@ -1,4 +1,4 @@
-import type { AuthResponse, UserProfileResponse } from "./types";
+import type { AuthResponse, FriendInviteResponse, FriendResponse, UserProfileResponse } from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
 const TOKEN_KEY = "habit_jwt";
@@ -92,4 +92,23 @@ export function uploadMyAvatar(file: File): Promise<UserProfileResponse> {
     method: "POST",
     body: formData
   });
+}
+
+export function getFriends(): Promise<FriendResponse[]> {
+  return apiRequest<FriendResponse[]>("/api/friends");
+}
+
+export function createFriendInvite(): Promise<FriendInviteResponse> {
+  return apiRequest<FriendInviteResponse>("/api/friends/invite", { method: "POST" });
+}
+
+export function acceptFriendInvite(code: string): Promise<FriendResponse> {
+  return apiRequest<FriendResponse>("/api/friends/accept", {
+    method: "POST",
+    body: JSON.stringify({ code })
+  });
+}
+
+export function removeFriend(friendId: string): Promise<void> {
+  return apiRequest<void>(`/api/friends/${friendId}`, { method: "DELETE" });
 }

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,6 +21,7 @@ import java.util.UUID;
 public class ActivityService {
 
     private final ActivityLogRepository activityLogRepository;
+    private final FriendService friendService;
 
     @Transactional
     public void log(UserEntity user, HabitEntity habit, ActivityType type, String message) {
@@ -35,14 +37,33 @@ public class ActivityService {
 
     @Transactional(readOnly = true)
     public List<ActivityResponse> list(UserEntity user) {
-        return activityLogRepository.findTop100ByUserOrderByCreatedAtDesc(user).stream()
+        // Feed scope includes own and friends events to support social tab.
+        List<UserEntity> feedUsers = new ArrayList<>();
+        feedUsers.add(user);
+        feedUsers.addAll(friendService.friendsOf(user));
+
+        return activityLogRepository.findTop100ByUserInOrderByCreatedAtDesc(feedUsers).stream()
                 .map(log -> new ActivityResponse(
                         log.getId(),
                         log.getHabit() != null ? log.getHabit().getId() : null,
+                        log.getUser().getId(),
+                        displayName(log.getUser()),
+                        log.getUser().getPhotoUrl(),
+                        log.getUser().getId().equals(user.getId()),
                         log.getType(),
                         log.getMessage(),
                         log.getCreatedAt()
                 ))
                 .toList();
+    }
+
+    private String displayName(UserEntity user) {
+        if (user.getFirstName() != null && !user.getFirstName().isBlank()) {
+            return user.getFirstName();
+        }
+        if (user.getUsername() != null && !user.getUsername().isBlank()) {
+            return "@" + user.getUsername();
+        }
+        return "User";
     }
 }

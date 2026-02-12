@@ -1,18 +1,35 @@
-import { Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Link, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "./auth";
 import { ActivityPage } from "./pages/ActivityPage";
+import { FriendsPage } from "./pages/FriendsPage";
 import { HabitFormPage } from "./pages/HabitFormPage";
 import { HabitStatsPage } from "./pages/HabitStatsPage";
 import { HomePage } from "./pages/HomePage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { SkeletonCard } from "./components/Skeleton";
+import { readStartParam } from "./telegram";
+
+function StartParamRouter() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const startParam = readStartParam();
+    if (!startParam?.startsWith("friend_")) return;
+    if (location.pathname === "/friends") return;
+    navigate(`/friends?code=${encodeURIComponent(startParam.slice("friend_".length))}`, { replace: true });
+  }, [location.pathname, navigate]);
+
+  return null;
+}
 
 function Navigation() {
   const location = useLocation();
   const { t } = useTranslation();
   const itemClass = (active: boolean) =>
-    `tap flex-1 rounded-2xl px-3 py-2 text-center text-sm font-semibold transition-all duration-200 ${
+    `tap flex-1 rounded-2xl px-2 py-2 text-center text-xs font-semibold transition-all duration-200 ${
       active ? "bg-white/90 text-ink" : "text-slate-500"
     }`;
 
@@ -26,6 +43,9 @@ function Navigation() {
       </Link>
       <Link className={itemClass(location.pathname.startsWith("/habits/new"))} to="/habits/new">
         {t("create")}
+      </Link>
+      <Link className={itemClass(location.pathname.startsWith("/friends"))} to="/friends">
+        {t("friends")}
       </Link>
       <Link className={itemClass(location.pathname.startsWith("/profile"))} to="/profile">
         {t("profile")}
@@ -65,6 +85,7 @@ export default function App() {
       </header>
 
       <Navigation />
+      <StartParamRouter />
 
       <main className="mt-4">
         <Routes>
@@ -73,6 +94,7 @@ export default function App() {
           <Route path="/habits/new" element={<HabitFormPage />} />
           <Route path="/habits/:id/edit" element={<HabitFormPage />} />
           <Route path="/habits/:id/stats" element={<HabitStatsPage />} />
+          <Route path="/friends" element={<FriendsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

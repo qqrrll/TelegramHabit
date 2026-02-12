@@ -32,9 +32,27 @@ export interface HabitRequest {
 export interface ActivityResponse {
   id: string;
   habitId: string | null;
+  userId: string;
+  actorName: string;
+  actorPhotoUrl: string | null;
+  ownEvent: boolean;
   type: "COMPLETED" | "STREAK" | "RECORD";
   message: string;
   createdAt: string;
+}
+
+export interface FriendResponse {
+  id: string;
+  username: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  photoUrl: string | null;
+}
+
+export interface FriendInviteResponse {
+  code: string;
+  inviteUrl: string;
+  expiresAt: string;
 }
 
 export interface HabitStatsResponse {

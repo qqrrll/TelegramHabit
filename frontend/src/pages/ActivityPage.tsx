@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef, useState, type TouchEventHandler } from "react";
 import { useTranslation } from "react-i18next";
-import { apiRequest } from "../api";
+import { apiRequest, resolveAssetUrl } from "../api";
 import { hapticImpact } from "../telegram";
 import { SkeletonList } from "../components/Skeleton";
 import type { ActivityResponse } from "../types";
+
+type FeedFilter = "all" | "mine" | "friends";
 
 function groupByDate(items: ActivityResponse[]): Array<{ date: string; items: ActivityResponse[] }> {
   const map = new Map<string, ActivityResponse[]>();
@@ -37,6 +39,7 @@ export function ActivityPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pullDistance, setPullDistance] = useState(0);
+  const [filter, setFilter] = useState<FeedFilter>("all");
   const touchStartY = useRef<number | null>(null);
   const pulling = useRef(false);
 
@@ -57,7 +60,13 @@ export function ActivityPage() {
     void loadActivity();
   }, []);
 
-  const grouped = useMemo(() => groupByDate(items), [items]);
+  const filteredItems = useMemo(() => {
+    if (filter === "mine") return items.filter((item) => item.ownEvent);
+    if (filter === "friends") return items.filter((item) => !item.ownEvent);
+    return items;
+  }, [filter, items]);
+
+  const grouped = useMemo(() => groupByDate(filteredItems), [filteredItems]);
 
   const onTouchStart: TouchEventHandler<HTMLElement> = (e) => {
     if (window.scrollY > 0) return;
@@ -96,24 +105,51 @@ export function ActivityPage() {
       <div className="glass-card p-4">
         <h2 className="text-lg font-black text-ink">{t("activityFeed")}</h2>
         <p className="mt-1 text-xs text-slate-400">{t("activitySubtitle")}</p>
+        <div className="mt-3 grid grid-cols-3 gap-1 rounded-2xl bg-white/75 p-1">
+          {(["all", "mine", "friends"] as FeedFilter[]).map((key) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setFilter(key)}
+              className={`tap rounded-xl px-2 py-2 text-xs font-semibold transition-all duration-200 ${
+                filter === key ? "bg-ink text-white shadow-sm" : "text-slate-500"
+              }`}
+            >
+              {key === "all" ? t("filterAll") : key === "mine" ? t("filterMine") : t("filterFriends")}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {items.length === 0 && <div className="glass-card p-4 text-sm text-slate-500">{t("noEvents")}</div>}
+      {filteredItems.length === 0 && <div className="glass-card p-4 text-sm text-slate-500">{t("noEvents")}</div>}
 
       {grouped.map((section) => (
         <div key={section.date} className="space-y-2">
           <p className="px-1 text-xs font-semibold uppercase tracking-wide text-slate-400">{section.date}</p>
-          {section.items.map((item, idx) => (
-            <article key={item.id} className="glass-card card-enter p-4" style={{ animationDelay: `${idx * 40}ms` }}>
-              <div className="flex items-center justify-between">
-                <div className="rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-ink shadow-sm">
-                  {item.type === "COMPLETED" ? t("completed") : item.type === "RECORD" ? t("record") : t("streak")}
+          {section.items.map((item, idx) => {
+            const actorPhoto = resolveAssetUrl(item.actorPhotoUrl);
+            return (
+              <article key={item.id} className="glass-card card-enter p-4" style={{ animationDelay: `${idx * 40}ms` }}>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    {actorPhoto ? (
+                      <img src={actorPhoto} alt={item.actorName} className="h-8 w-8 rounded-full object-cover" />
+                    ) : (
+                      <div className="grid h-8 w-8 place-items-center rounded-full bg-white/90 text-sm shadow-sm">👤</div>
+                    )}
+                    <div>
+                      <p className="text-xs font-bold text-ink">{item.ownEvent ? t("youLabel") : item.actorName}</p>
+                      <div className="rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-500 shadow-sm">
+                        {item.type === "COMPLETED" ? t("completed") : item.type === "RECORD" ? t("record") : t("streak")}
+                      </div>
+                    </div>
+                  </div>
+                  <time className="text-xs text-slate-400">{relativeTime(item.createdAt, i18n.language)}</time>
                 </div>
-                <time className="text-xs text-slate-400">{relativeTime(item.createdAt, i18n.language)}</time>
-              </div>
-              <p className="mt-3 text-sm font-medium text-slate-700">{item.message}</p>
-            </article>
-          ))}
+                <p className="mt-3 text-sm font-medium text-slate-700">{item.message}</p>
+              </article>
+            );
+          })}
         </div>
       ))}
     </section>
