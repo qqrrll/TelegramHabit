@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { acceptFriendInvite, createFriendInvite, getFriends, removeFriend, resolveAssetUrl } from "../api";
-import { hapticImpact, readStartParam } from "../telegram";
+import { hapticImpact, markStartParamHandled, readStartParam } from "../telegram";
 import type { FriendResponse } from "../types";
 
 function fullName(friend: FriendResponse): string {
@@ -35,6 +35,10 @@ export function FriendsPage() {
     return null;
   }, [location.search]);
 
+  const markInviteHandled = (code: string) => {
+    markStartParamHandled(`friend_${code}`);
+  };
+
   const loadFriends = async () => {
     setLoading(true);
     setError(null);
@@ -58,11 +62,22 @@ export function FriendsPage() {
     setError(null);
     acceptFriendInvite(inviteCode)
       .then(async () => {
+        markInviteHandled(inviteCode);
         hapticImpact("medium");
         await loadFriends();
         navigate("/friends", { replace: true });
       })
-      .catch((e: Error) => setError(e.message))
+      .catch((e: Error) => {
+        const message = e.message || "";
+        if (
+          message.includes("Invite already used") ||
+          message.includes("Invite expired") ||
+          message.includes("Cannot accept your own invite")
+        ) {
+          markInviteHandled(inviteCode);
+        }
+        setError(message);
+      })
       .finally(() => setAccepting(false));
   }, [inviteCode, navigate]);
 

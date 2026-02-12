@@ -9,7 +9,7 @@ import { HabitStatsPage } from "./pages/HabitStatsPage";
 import { HomePage } from "./pages/HomePage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { SkeletonCard } from "./components/Skeleton";
-import { readStartParam } from "./telegram";
+import { isStartParamHandled, readStartParam } from "./telegram";
 
 function StartParamRouter() {
   const navigate = useNavigate();
@@ -18,6 +18,7 @@ function StartParamRouter() {
   useEffect(() => {
     const startParam = readStartParam();
     if (!startParam?.startsWith("friend_")) return;
+    if (isStartParamHandled(startParam)) return;
     if (location.pathname === "/friends") return;
     navigate(`/friends?code=${encodeURIComponent(startParam.slice("friend_".length))}`, { replace: true });
   }, [location.pathname, navigate]);
