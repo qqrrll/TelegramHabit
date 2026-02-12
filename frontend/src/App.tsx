@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "./auth";
 import { ActivityPage } from "./pages/ActivityPage";
 import { FriendsPage } from "./pages/FriendsPage";
+import { FriendHabitStatsPage } from "./pages/FriendHabitStatsPage";
+import { FriendProfilePage } from "./pages/FriendProfilePage";
 import { HabitFormPage } from "./pages/HabitFormPage";
 import { HabitStatsPage } from "./pages/HabitStatsPage";
 import { HomePage } from "./pages/HomePage";
@@ -96,6 +98,8 @@ export default function App() {
           <Route path="/habits/:id/edit" element={<HabitFormPage />} />
           <Route path="/habits/:id/stats" element={<HabitStatsPage />} />
           <Route path="/friends" element={<FriendsPage />} />
+          <Route path="/friends/:friendId" element={<FriendProfilePage />} />
+          <Route path="/friends/:friendId/habits/:habitId/stats" element={<FriendHabitStatsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

@@ -71,5 +71,10 @@
   "noUsername": "Без username",
   "filterAll": "Все",
   "filterMine": "Мои",
-  "filterFriends": "Друзья"
+  "filterFriends": "Друзья",
+  "habitCompletedToday": "Привычка отмечена выполненной на сегодня",
+  "friendProfileUnavailable": "Профиль друга недоступен",
+  "friendHabits": "Привычки друга",
+  "friendNoHabits": "У этого друга пока нет привычек.",
+  "friendHabitStats": "Статистика привычки друга"
 }

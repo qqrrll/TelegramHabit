@@ -1,4 +1,11 @@
-import type { AuthResponse, FriendInviteResponse, FriendResponse, UserProfileResponse } from "./types";
+import type {
+  AuthResponse,
+  FriendInviteResponse,
+  FriendResponse,
+  HabitResponse,
+  HabitStatsResponse,
+  UserProfileResponse
+} from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
 const TOKEN_KEY = "habit_jwt";
@@ -125,4 +132,16 @@ export function acceptFriendInvite(code: string): Promise<FriendResponse> {
 
 export function removeFriend(friendId: string): Promise<void> {
   return apiRequest<void>(`/api/friends/${friendId}`, { method: "DELETE" });
+}
+
+export function getFriendProfile(friendId: string): Promise<FriendResponse> {
+  return apiRequest<FriendResponse>(`/api/friends/${friendId}/profile`);
+}
+
+export function getFriendHabits(friendId: string): Promise<HabitResponse[]> {
+  return apiRequest<HabitResponse[]>(`/api/friends/${friendId}/habits`);
+}
+
+export function getFriendHabitStats(friendId: string, habitId: string): Promise<HabitStatsResponse> {
+  return apiRequest<HabitStatsResponse>(`/api/friends/${friendId}/habits/${habitId}/stats`);
 }

@@ -63,6 +63,7 @@ export function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [highlightedHabitId, setHighlightedHabitId] = useState<string | null>(null);
   const [pressedHabitId, setPressedHabitId] = useState<string | null>(null);
+  const [completeToast, setCompleteToast] = useState<string | null>(null);
   const [pullDistance, setPullDistance] = useState(0);
   const touchStartY = useRef<number | null>(null);
   const pulling = useRef(false);
@@ -128,6 +129,8 @@ export function HomePage() {
       await new Promise((resolve) => setTimeout(resolve, 170));
       await apiRequest(`/api/habits/${id}/complete`, { method: "POST" });
       await loadHabits();
+      setCompleteToast(t("habitCompletedToday"));
+      window.setTimeout(() => setCompleteToast(null), 1600);
       window.setTimeout(() => setHighlightedHabitId(null), 320);
     } catch (e) {
       setError((e as Error).message);
@@ -147,6 +150,11 @@ export function HomePage() {
 
   return (
     <section className="space-y-3 pb-24" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+      {completeToast && (
+        <div className="glass-card sticky top-2 z-30 border-emerald-200 bg-emerald-50/90 px-3 py-2 text-center text-xs font-semibold text-emerald-700">
+          {completeToast}
+        </div>
+      )}
       <div
         className="grid overflow-hidden text-center text-xs font-semibold text-slate-400 transition-all duration-200"
         style={{ height: `${pullDistance}px`, opacity: pullDistance > 8 ? 1 : 0 }}

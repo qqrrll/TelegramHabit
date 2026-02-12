@@ -5,9 +5,12 @@ import lombok.RequiredArgsConstructor;
 import org.example.telegramhabit.dto.AcceptFriendInviteRequest;
 import org.example.telegramhabit.dto.FriendInviteResponse;
 import org.example.telegramhabit.dto.FriendResponse;
+import org.example.telegramhabit.dto.HabitResponse;
+import org.example.telegramhabit.dto.HabitStatsResponse;
 import org.example.telegramhabit.entity.UserEntity;
 import org.example.telegramhabit.security.SecurityUtils;
 import org.example.telegramhabit.service.FriendService;
+import org.example.telegramhabit.service.HabitService;
 import org.example.telegramhabit.service.UserService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,6 +30,7 @@ import java.util.UUID;
 public class FriendController {
 
     private final FriendService friendService;
+    private final HabitService habitService;
     private final UserService userService;
 
     @GetMapping
@@ -47,6 +51,23 @@ public class FriendController {
     @DeleteMapping("/{friendId}")
     public void remove(@PathVariable UUID friendId) {
         friendService.removeFriend(currentUser(), friendId);
+    }
+
+    @GetMapping("/{friendId}/profile")
+    public FriendResponse profile(@PathVariable UUID friendId) {
+        return friendService.friendProfile(currentUser(), friendId);
+    }
+
+    @GetMapping("/{friendId}/habits")
+    public List<HabitResponse> habits(@PathVariable UUID friendId) {
+        UserEntity friend = friendService.requireFriend(currentUser(), friendId);
+        return habitService.listByOwner(friend);
+    }
+
+    @GetMapping("/{friendId}/habits/{habitId}/stats")
+    public HabitStatsResponse habitStats(@PathVariable UUID friendId, @PathVariable UUID habitId) {
+        UserEntity friend = friendService.requireFriend(currentUser(), friendId);
+        return habitService.statsByOwner(friend, habitId);
     }
 
     private UserEntity currentUser() {

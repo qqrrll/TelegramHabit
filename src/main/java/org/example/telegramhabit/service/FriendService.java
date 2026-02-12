@@ -70,9 +70,6 @@ public class FriendService {
         FriendInviteEntity invite = friendInviteRepository.findByCode(code)
                 .orElseThrow(() -> new EntityNotFoundException("Invite not found"));
 
-        if (invite.getUsedAt() != null) {
-            throw new IllegalArgumentException("Invite already used");
-        }
         if (invite.getExpiresAt().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Invite expired");
         }
@@ -84,16 +81,12 @@ public class FriendService {
         createEdgeIfMissing(inviter, user);
         createEdgeIfMissing(user, inviter);
 
-        invite.setUsedAt(LocalDateTime.now());
+        if (invite.getUsedAt() == null) {
+            invite.setUsedAt(LocalDateTime.now());
+        }
         friendInviteRepository.save(invite);
 
-        return new FriendResponse(
-                inviter.getId(),
-                inviter.getUsername(),
-                inviter.getFirstName(),
-                inviter.getLastName(),
-                inviter.getPhotoUrl()
-        );
+        return toFriendResponse(inviter);
     }
 
     @Transactional(readOnly = true)
@@ -105,13 +98,23 @@ public class FriendService {
 
     @Transactional
     public void removeFriend(UserEntity user, UUID friendId) {
-        UserEntity friend = friendsOf(user).stream()
-                .filter(candidate -> candidate.getId().equals(friendId))
-                .findFirst()
-                .orElseThrow(() -> new EntityNotFoundException("Friend not found"));
+        UserEntity friend = requireFriend(user, friendId);
 
         friendshipRepository.deleteByUserAndFriend(user, friend);
         friendshipRepository.deleteByUserAndFriend(friend, user);
+    }
+
+    @Transactional(readOnly = true)
+    public UserEntity requireFriend(UserEntity user, UUID friendId) {
+        return friendsOf(user).stream()
+                .filter(candidate -> candidate.getId().equals(friendId))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("Friend not found"));
+    }
+
+    @Transactional(readOnly = true)
+    public FriendResponse friendProfile(UserEntity user, UUID friendId) {
+        return toFriendResponse(requireFriend(user, friendId));
     }
 
     private String buildInviteUrl(String code) {
@@ -132,5 +135,15 @@ public class FriendService {
         edge.setFriend(friend);
         edge.setCreatedAt(LocalDateTime.now());
         friendshipRepository.save(edge);
+    }
+
+    private FriendResponse toFriendResponse(UserEntity friend) {
+        return new FriendResponse(
+                friend.getId(),
+                friend.getUsername(),
+                friend.getFirstName(),
+                friend.getLastName(),
+                friend.getPhotoUrl()
+        );
     }
 }

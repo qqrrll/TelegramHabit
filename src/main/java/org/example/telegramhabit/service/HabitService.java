@@ -37,6 +37,13 @@ public class HabitService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<HabitResponse> listByOwner(UserEntity owner) {
+        return habitRepository.findByUserOrderByCreatedAtDesc(owner).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
     @Transactional
     public HabitResponse create(UserEntity user, HabitRequest request) {
         validateRequest(request);
@@ -75,6 +82,16 @@ public class HabitService {
     @Transactional(readOnly = true)
     public HabitStatsResponse stats(UserEntity user, UUID habitId) {
         HabitEntity habit = requireOwnedHabit(user, habitId);
+        return statsForHabit(habit);
+    }
+
+    @Transactional(readOnly = true)
+    public HabitStatsResponse statsByOwner(UserEntity owner, UUID habitId) {
+        HabitEntity habit = requireOwnedHabit(owner, habitId);
+        return statsForHabit(habit);
+    }
+
+    private HabitStatsResponse statsForHabit(HabitEntity habit) {
         LocalDate now = LocalDate.now();
         LocalDate weekStart = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate weekEnd = weekStart.plusDays(6);

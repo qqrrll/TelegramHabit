@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type TouchEventHandler } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { apiRequest, resolveAssetUrl } from "../api";
 import { hapticImpact } from "../telegram";
@@ -138,7 +139,13 @@ export function ActivityPage() {
                       <div className="grid h-8 w-8 place-items-center rounded-full bg-white/90 text-sm shadow-sm">👤</div>
                     )}
                     <div>
-                      <p className="text-xs font-bold text-ink">{item.ownEvent ? t("youLabel") : item.actorName}</p>
+                      {item.ownEvent ? (
+                        <p className="text-xs font-bold text-ink">{t("youLabel")}</p>
+                      ) : (
+                        <Link to={`/friends/${item.userId}`} className="text-xs font-bold text-ink underline decoration-slate-300">
+                          {item.actorName}
+                        </Link>
+                      )}
                       <div className="rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-500 shadow-sm">
                         {item.type === "COMPLETED" ? t("completed") : item.type === "RECORD" ? t("record") : t("streak")}
                       </div>
@@ -147,6 +154,20 @@ export function ActivityPage() {
                   <time className="text-xs text-slate-400">{relativeTime(item.createdAt, i18n.language)}</time>
                 </div>
                 <p className="mt-3 text-sm font-medium text-slate-700">{item.message}</p>
+                {item.habitId && (
+                  <div className="mt-2">
+                    <Link
+                      className="tap inline-flex rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm"
+                      to={
+                        item.ownEvent
+                          ? `/habits/${item.habitId}/stats`
+                          : `/friends/${item.userId}/habits/${item.habitId}/stats`
+                      }
+                    >
+                      {t("stats")}
+                    </Link>
+                  </div>
+                )}
               </article>
             );
           })}

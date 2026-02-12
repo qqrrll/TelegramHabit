@@ -71,5 +71,10 @@
   "noUsername": "No username",
   "filterAll": "All",
   "filterMine": "Mine",
-  "filterFriends": "Friends"
+  "filterFriends": "Friends",
+  "habitCompletedToday": "Habit marked as completed for today",
+  "friendProfileUnavailable": "Friend profile unavailable",
+  "friendHabits": "Friend habits",
+  "friendNoHabits": "This friend has no habits yet.",
+  "friendHabitStats": "Friend habit stats"
 }
