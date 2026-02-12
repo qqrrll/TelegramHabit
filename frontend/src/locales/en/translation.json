@@ -76,5 +76,8 @@
   "friendProfileUnavailable": "Friend profile unavailable",
   "friendHabits": "Friend habits",
   "friendNoHabits": "This friend has no habits yet.",
-  "friendHabitStats": "Friend habit stats"
+  "friendHabitStats": "Friend habit stats",
+  "habitPhoto": "Habit photo",
+  "uploadHabitPhoto": "Upload photo",
+  "messageFriend": "Message"
 }

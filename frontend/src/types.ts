@@ -14,6 +14,7 @@ export interface HabitResponse {
   timesPerWeek: number | null;
   color: string;
   icon: string;
+  imageUrl: string | null;
   archived: boolean;
   currentStreak: number;
   bestStreak: number;

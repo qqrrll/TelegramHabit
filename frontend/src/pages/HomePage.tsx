@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type TouchEventHandler } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { apiRequest } from "../api";
+import { apiRequest, resolveAssetUrl } from "../api";
 import { hapticImpact } from "../telegram";
 import { SkeletonList } from "../components/Skeleton";
 import type { HabitCompletionResponse, HabitResponse } from "../types";
@@ -176,7 +176,15 @@ export function HomePage() {
         >
           <div className="pr-16">
             <div className="flex items-start gap-3">
-              <div className="mt-0.5 text-2xl">{habit.icon}</div>
+              {habit.imageUrl ? (
+                <img
+                  src={resolveAssetUrl(habit.imageUrl) ?? ""}
+                  alt={habit.title}
+                  className="mt-0.5 h-10 w-10 rounded-xl object-cover shadow-sm"
+                />
+              ) : (
+                <div className="mt-0.5 text-2xl">{habit.icon}</div>
+              )}
               <div className="min-w-0">
                 <h3 className="truncate text-[17px] font-black text-ink">{habit.title}</h3>
                 <p className="mt-0.5 text-[11px] text-slate-400">

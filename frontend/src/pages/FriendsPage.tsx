@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { acceptFriendInvite, createFriendInvite, getFriends, removeFriend, resolveAssetUrl } from "../api";
 import { hapticImpact, markStartParamHandled, readStartParam } from "../telegram";
 import type { FriendResponse } from "../types";
@@ -174,9 +174,21 @@ export function FriendsPage() {
                   <div className="grid h-10 w-10 place-items-center rounded-full bg-white text-base shadow-sm">👤</div>
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-bold text-ink">{fullName(friend)}</p>
+                  <Link to={`/friends/${friend.id}`} className="truncate text-sm font-bold text-ink underline decoration-slate-300">
+                    {fullName(friend)}
+                  </Link>
                   <p className="truncate text-xs text-slate-400">{friend.username ? `@${friend.username}` : t("noUsername")}</p>
                 </div>
+                {friend.username && (
+                  <a
+                    href={`https://t.me/${friend.username}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="tap rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-sky-600 shadow-sm"
+                  >
+                    {t("messageFriend")}
+                  </a>
+                )}
                 <button
                   type="button"
                   className="tap rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-rose-600 shadow-sm"

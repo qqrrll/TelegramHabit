@@ -53,6 +53,16 @@ export function FriendProfilePage() {
             <p className="text-xs text-slate-400">{friend.username ? `@${friend.username}` : t("noUsername")}</p>
           </div>
         </div>
+        {friend.username && (
+          <a
+            href={`https://t.me/${friend.username}`}
+            target="_blank"
+            rel="noreferrer"
+            className="tap mt-3 inline-flex rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-sky-600 shadow-sm"
+          >
+            {t("messageFriend")}
+          </a>
+        )}
       </article>
 
       <article className="glass-card p-4">
@@ -61,13 +71,20 @@ export function FriendProfilePage() {
         <div className="space-y-2">
           {habits.map((habit) => (
             <div key={habit.id} className="flex items-center justify-between gap-2 rounded-2xl bg-white/70 p-3">
-              <div className="min-w-0">
+              <div className="flex min-w-0 items-center gap-2">
+                {habit.imageUrl ? (
+                  <img src={resolveAssetUrl(habit.imageUrl) ?? ""} alt={habit.title} className="h-9 w-9 rounded-lg object-cover" />
+                ) : (
+                  <div className="grid h-9 w-9 place-items-center rounded-lg bg-white text-lg shadow-sm">{habit.icon}</div>
+                )}
+                <div className="min-w-0">
                 <p className="truncate text-sm font-bold text-ink">
-                  {habit.icon} {habit.title}
+                  {habit.title}
                 </p>
                 <p className="text-xs text-slate-400">
                   {habit.currentStreak} • {t("bestShort", { count: habit.bestStreak })}
                 </p>
+                </div>
               </div>
               <Link
                 className="tap rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm"
@@ -82,4 +99,3 @@ export function FriendProfilePage() {
     </section>
   );
 }
-

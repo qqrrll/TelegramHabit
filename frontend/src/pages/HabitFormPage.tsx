@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { apiRequest } from "../api";
+import { apiRequest, resolveAssetUrl, uploadHabitImage } from "../api";
 import { hapticImpact } from "../telegram";
 import type { HabitRequest, HabitResponse, HabitType } from "../types";
 
@@ -24,6 +24,9 @@ export function HabitFormPage() {
   const [form, setForm] = useState<HabitRequest>(defaultForm);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [habitIdForImage, setHabitIdForImage] = useState<string | null>(id ?? null);
+  const [habitImageUrl, setHabitImageUrl] = useState<string | null>(null);
+  const [imageUploading, setImageUploading] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -42,6 +45,8 @@ export function HabitFormPage() {
           icon: habit.icon,
           archived: habit.archived
         });
+        setHabitIdForImage(habit.id);
+        setHabitImageUrl(habit.imageUrl);
       })
       .catch((e: Error) => setError(e.message));
   }, [id]);
@@ -56,9 +61,13 @@ export function HabitFormPage() {
         timesPerWeek: form.type === "WEEKLY" ? form.timesPerWeek : null
       };
       if (id) {
-        await apiRequest(`/api/habits/${id}`, { method: "PUT", body: JSON.stringify(payload) });
+        const updated = await apiRequest<HabitResponse>(`/api/habits/${id}`, { method: "PUT", body: JSON.stringify(payload) });
+        setHabitIdForImage(updated.id);
+        setHabitImageUrl(updated.imageUrl);
       } else {
-        await apiRequest("/api/habits", { method: "POST", body: JSON.stringify(payload) });
+        const created = await apiRequest<HabitResponse>("/api/habits", { method: "POST", body: JSON.stringify(payload) });
+        setHabitIdForImage(created.id);
+        setHabitImageUrl(created.imageUrl);
       }
       hapticImpact("heavy");
       navigate("/");
@@ -66,6 +75,22 @@ export function HabitFormPage() {
       setError((e as Error).message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const onHabitImageSelected = async (file: File | null) => {
+    if (!file || !habitIdForImage) return;
+    setImageUploading(true);
+    setError(null);
+    try {
+      hapticImpact("light");
+      const updated = await uploadHabitImage(habitIdForImage, file);
+      setHabitImageUrl(updated.imageUrl);
+      hapticImpact("medium");
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setImageUploading(false);
     }
   };
 
@@ -182,6 +207,29 @@ export function HabitFormPage() {
             ))}
           </div>
         </div>
+
+        {habitIdForImage && (
+          <div>
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">{t("habitPhoto")}</span>
+            <div className="flex items-center gap-3 rounded-2xl bg-white/70 p-3">
+              {habitImageUrl ? (
+                <img src={resolveAssetUrl(habitImageUrl) ?? ""} alt={form.title || "Habit"} className="h-14 w-14 rounded-xl object-cover" />
+              ) : (
+                <div className="grid h-14 w-14 place-items-center rounded-xl bg-white text-2xl shadow-sm">{form.icon}</div>
+              )}
+              <label className="tap inline-flex cursor-pointer rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm">
+                {imageUploading ? t("saving") : t("uploadHabitPhoto")}
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                  onChange={(e) => void onHabitImageSelected(e.target.files?.[0] ?? null)}
+                  disabled={imageUploading}
+                />
+              </label>
+            </div>
+          </div>
+        )}
 
         {id && (
           <label className="flex items-center gap-2 rounded-2xl bg-white/70 px-3 py-2 text-sm text-slate-600">

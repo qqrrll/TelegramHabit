@@ -12,6 +12,7 @@ import org.example.telegramhabit.repository.HabitCompletionRepository;
 import org.example.telegramhabit.repository.HabitRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -29,6 +30,7 @@ public class HabitService {
     private final HabitRepository habitRepository;
     private final HabitCompletionRepository completionRepository;
     private final StreakService streakService;
+    private final AvatarStorageService avatarStorageService;
 
     @Transactional(readOnly = true)
     public List<HabitResponse> list(UserEntity user) {
@@ -123,6 +125,14 @@ public class HabitService {
                 .orElseThrow(() -> new EntityNotFoundException("Habit not found"));
     }
 
+    @Transactional
+    public HabitResponse uploadImage(UserEntity user, UUID habitId, MultipartFile file) {
+        HabitEntity habit = requireOwnedHabit(user, habitId);
+        String imageUrl = avatarStorageService.saveHabitImage(file);
+        habit.setImageUrl(imageUrl);
+        return toResponse(habitRepository.save(habit));
+    }
+
     private HabitResponse toResponse(HabitEntity habit) {
         return new HabitResponse(
                 habit.getId(),
@@ -131,6 +141,7 @@ public class HabitService {
                 habit.getTimesPerWeek(),
                 habit.getColor(),
                 habit.getIcon(),
+                habit.getImageUrl(),
                 habit.isArchived(),
                 streakService.currentStreak(habit),
                 streakService.bestStreak(habit),

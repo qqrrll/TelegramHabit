@@ -31,6 +31,14 @@ public class AvatarStorageService {
     }
 
     public String saveAvatar(MultipartFile file) {
+        return saveImage(file, "Cannot store avatar file");
+    }
+
+    public String saveHabitImage(MultipartFile file) {
+        return saveImage(file, "Cannot store habit image");
+    }
+
+    private String saveImage(MultipartFile file, String storeErrorMessage) {
         validate(file);
         String extension = resolveExtension(file.getOriginalFilename(), file.getContentType());
         String filename = UUID.randomUUID() + "." + extension;
@@ -40,7 +48,7 @@ public class AvatarStorageService {
             Files.createDirectories(uploadDir);
             Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException ex) {
-            throw new IllegalStateException("Cannot store avatar file");
+            throw new IllegalStateException(storeErrorMessage);
         }
 
         return avatarBaseUrl + "/" + filename;

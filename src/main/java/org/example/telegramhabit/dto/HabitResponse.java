@@ -12,6 +12,7 @@ public record HabitResponse(
         Integer timesPerWeek,
         String color,
         String icon,
+        String imageUrl,
         boolean archived,
         int currentStreak,
         int bestStreak,

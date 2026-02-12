@@ -145,3 +145,12 @@ export function getFriendHabits(friendId: string): Promise<HabitResponse[]> {
 export function getFriendHabitStats(friendId: string, habitId: string): Promise<HabitStatsResponse> {
   return apiRequest<HabitStatsResponse>(`/api/friends/${friendId}/habits/${habitId}/stats`);
 }
+
+export function uploadHabitImage(habitId: string, file: File): Promise<HabitResponse> {
+  const formData = new FormData();
+  formData.append("file", file);
+  return apiRequest<HabitResponse>(`/api/habits/${habitId}/image`, {
+    method: "POST",
+    body: formData
+  });
+}

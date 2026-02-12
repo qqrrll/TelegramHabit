@@ -50,6 +50,9 @@ public class HabitEntity {
     @Column(name = "icon", nullable = false)
     private String icon;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @Column(name = "is_archived", nullable = false)
     private boolean archived;
 

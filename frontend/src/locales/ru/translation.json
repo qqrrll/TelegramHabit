@@ -76,5 +76,8 @@
   "friendProfileUnavailable": "Профиль друга недоступен",
   "friendHabits": "Привычки друга",
   "friendNoHabits": "У этого друга пока нет привычек.",
-  "friendHabitStats": "Статистика привычки друга"
+  "friendHabitStats": "Статистика привычки друга",
+  "habitPhoto": "Фото привычки",
+  "uploadHabitPhoto": "Загрузить фото",
+  "messageFriend": "Написать"
 }
