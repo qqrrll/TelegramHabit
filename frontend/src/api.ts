@@ -32,7 +32,19 @@ export async function telegramAuth(initData: string): Promise<AuthResponse> {
     body: JSON.stringify({ initData })
   });
   if (!response.ok) {
-    throw new Error("Telegram auth failed");
+    let errorMessage = "Telegram auth failed";
+    try {
+      const body = (await response.json()) as { error?: string };
+      if (body?.error) {
+        errorMessage = body.error;
+      }
+    } catch {
+      const text = await response.text();
+      if (text) {
+        errorMessage = text;
+      }
+    }
+    throw new Error(errorMessage);
   }
   return response.json() as Promise<AuthResponse>;
 }
