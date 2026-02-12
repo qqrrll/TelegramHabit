@@ -69,12 +69,16 @@ export function FriendsPage() {
       })
       .catch((e: Error) => {
         const message = e.message || "";
-        if (
+        const alreadyHandledInviteError =
           message.includes("Invite already used") ||
           message.includes("Invite expired") ||
-          message.includes("Cannot accept your own invite")
-        ) {
+          message.includes("Cannot accept your own invite");
+
+        if (alreadyHandledInviteError) {
           markInviteHandled(inviteCode);
+          setError(null);
+          navigate("/friends", { replace: true });
+          return;
         }
         setError(message);
       })
