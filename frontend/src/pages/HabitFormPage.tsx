@@ -27,6 +27,8 @@ export function HabitFormPage() {
   const [habitIdForImage, setHabitIdForImage] = useState<string | null>(id ?? null);
   const [habitImageUrl, setHabitImageUrl] = useState<string | null>(null);
   const [imageUploading, setImageUploading] = useState(false);
+  const [pendingImageFile, setPendingImageFile] = useState<File | null>(null);
+  const [pendingImagePreviewUrl, setPendingImagePreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -51,6 +53,15 @@ export function HabitFormPage() {
       .catch((e: Error) => setError(e.message));
   }, [id]);
 
+  useEffect(
+    () => () => {
+      if (pendingImagePreviewUrl) {
+        URL.revokeObjectURL(pendingImagePreviewUrl);
+      }
+    },
+    [pendingImagePreviewUrl]
+  );
+
   const submit = async () => {
     setSaving(true);
     setError(null);
@@ -60,14 +71,28 @@ export function HabitFormPage() {
         ...form,
         timesPerWeek: form.type === "WEEKLY" ? form.timesPerWeek : null
       };
+      let targetHabitId = id ?? habitIdForImage;
       if (id) {
         const updated = await apiRequest<HabitResponse>(`/api/habits/${id}`, { method: "PUT", body: JSON.stringify(payload) });
         setHabitIdForImage(updated.id);
         setHabitImageUrl(updated.imageUrl);
+        targetHabitId = updated.id;
       } else {
         const created = await apiRequest<HabitResponse>("/api/habits", { method: "POST", body: JSON.stringify(payload) });
         setHabitIdForImage(created.id);
         setHabitImageUrl(created.imageUrl);
+        targetHabitId = created.id;
+      }
+
+      if (pendingImageFile && targetHabitId) {
+        setImageUploading(true);
+        const updatedWithImage = await uploadHabitImage(targetHabitId, pendingImageFile);
+        setHabitImageUrl(updatedWithImage.imageUrl);
+        setPendingImageFile(null);
+        if (pendingImagePreviewUrl) {
+          URL.revokeObjectURL(pendingImagePreviewUrl);
+          setPendingImagePreviewUrl(null);
+        }
       }
       hapticImpact("heavy");
       navigate("/");
@@ -75,13 +100,24 @@ export function HabitFormPage() {
       setError((e as Error).message);
     } finally {
       setSaving(false);
+      setImageUploading(false);
     }
   };
 
   const onHabitImageSelected = async (file: File | null) => {
-    if (!file || !habitIdForImage) return;
-    setImageUploading(true);
+    if (!file) return;
     setError(null);
+
+    if (!habitIdForImage) {
+      setPendingImageFile(file);
+      if (pendingImagePreviewUrl) {
+        URL.revokeObjectURL(pendingImagePreviewUrl);
+      }
+      setPendingImagePreviewUrl(URL.createObjectURL(file));
+      return;
+    }
+
+    setImageUploading(true);
     try {
       hapticImpact("light");
       const updated = await uploadHabitImage(habitIdForImage, file);
@@ -208,28 +244,28 @@ export function HabitFormPage() {
           </div>
         </div>
 
-        {habitIdForImage && (
-          <div>
-            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">{t("habitPhoto")}</span>
-            <div className="flex items-center gap-3 rounded-2xl bg-white/70 p-3">
-              {habitImageUrl ? (
-                <img src={resolveAssetUrl(habitImageUrl) ?? ""} alt={form.title || "Habit"} className="h-14 w-14 rounded-xl object-cover" />
-              ) : (
-                <div className="grid h-14 w-14 place-items-center rounded-xl bg-white text-2xl shadow-sm">{form.icon}</div>
-              )}
-              <label className="tap inline-flex cursor-pointer rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm">
-                {imageUploading ? t("saving") : t("uploadHabitPhoto")}
-                <input
-                  type="file"
-                  accept="image/png,image/jpeg,image/webp"
-                  className="hidden"
-                  onChange={(e) => void onHabitImageSelected(e.target.files?.[0] ?? null)}
-                  disabled={imageUploading}
-                />
-              </label>
-            </div>
+        <div>
+          <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">{t("habitPhoto")}</span>
+          <div className="flex items-center gap-3 rounded-2xl bg-white/70 p-3">
+            {habitImageUrl ? (
+              <img src={resolveAssetUrl(habitImageUrl) ?? ""} alt={form.title || "Habit"} className="h-14 w-14 rounded-xl object-cover" />
+            ) : pendingImagePreviewUrl ? (
+              <img src={pendingImagePreviewUrl} alt={form.title || "Habit"} className="h-14 w-14 rounded-xl object-cover" />
+            ) : (
+              <div className="grid h-14 w-14 place-items-center rounded-xl bg-white text-2xl shadow-sm">{form.icon}</div>
+            )}
+            <label className="tap inline-flex cursor-pointer rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm">
+              {imageUploading ? t("saving") : t("uploadHabitPhoto")}
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="hidden"
+                onChange={(e) => void onHabitImageSelected(e.target.files?.[0] ?? null)}
+                disabled={imageUploading}
+              />
+            </label>
           </div>
-        )}
+        </div>
 
         {id && (
           <label className="flex items-center gap-2 rounded-2xl bg-white/70 px-3 py-2 text-sm text-slate-600">
