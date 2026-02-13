@@ -1,0 +1,7 @@
+{
+  "name": "telegram-habit-root",
+  "private": true,
+  "scripts": {
+    "build": "cd frontend && npm run build"
+  }
+}
