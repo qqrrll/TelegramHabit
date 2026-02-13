@@ -2,18 +2,22 @@ package org.example.telegramhabit.config;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
+@Slf4j
 // Что делает: описывает ключевой компонент backend-слоя приложения.
 // Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public class ApiExceptionHandler {
@@ -40,6 +44,16 @@ public class ApiExceptionHandler {
         return ResponseEntity.badRequest().body(baseBody(HttpStatus.BAD_REQUEST, ex.getMessage()));
     }
 
+    @ExceptionHandler({
+            MaxUploadSizeExceededException.class,
+            MultipartException.class
+    })
+    // Что делает: обрабатывает исключение и формирует корректный HTTP-ответ.
+    // Как делает: берёт контекст ошибки, собирает тело ответа и выставляет подходящий HTTP-статус.
+    public ResponseEntity<Map<String, Object>> handleMultipart(RuntimeException ex) {
+        return ResponseEntity.badRequest().body(baseBody(HttpStatus.BAD_REQUEST, "Image is too large or invalid multipart request"));
+    }
+
     @ExceptionHandler(EntityNotFoundException.class)
     // Что делает: обрабатывает исключение и формирует корректный HTTP-ответ.
     // Как делает: берёт контекст ошибки, собирает тело ответа и выставляет подходящий HTTP-статус.
@@ -58,6 +72,7 @@ public class ApiExceptionHandler {
     // Что делает: обрабатывает исключение и формирует корректный HTTP-ответ.
     // Как делает: берёт контекст ошибки, собирает тело ответа и выставляет подходящий HTTP-статус.
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
+        log.error("Unhandled server error", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(baseBody(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"));
     }
