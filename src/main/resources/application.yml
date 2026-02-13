@@ -45,3 +45,4 @@ app:
     avatar-base-url: ${AVATAR_BASE_URL:/uploads}
   friends:
     invite-base-url: ${FRIEND_INVITE_BASE_URL:http://localhost:5173/friends}
+    prefer-telegram-deep-link: ${PREFER_TELEGRAM_DEEP_LINK:false}

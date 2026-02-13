@@ -37,6 +37,9 @@ public class FriendService {
     @Value("${app.telegram.miniapp-short-name:}")
     private String miniAppShortName;
 
+    @Value("${app.friends.prefer-telegram-deep-link:false}")
+    private boolean preferTelegramDeepLink;
+
     @Transactional(readOnly = true)
     // Что делает: читает и возвращает данные для API или внутренней логики.
     // Как делает: делает запрос к репозиторию, при необходимости фильтрует и маппит результат.
@@ -136,7 +139,7 @@ public class FriendService {
     // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private String buildInviteUrl(String code) {
         String encoded = URLEncoder.encode("friend_" + code, StandardCharsets.UTF_8);
-        if (!botUsername.isBlank() && !miniAppShortName.isBlank()) {
+        if (preferTelegramDeepLink && !botUsername.isBlank() && !miniAppShortName.isBlank()) {
             return "https://t.me/" + botUsername + "/" + miniAppShortName + "?startapp=" + encoded;
         }
         return inviteBaseUrl + "?code=" + code;
