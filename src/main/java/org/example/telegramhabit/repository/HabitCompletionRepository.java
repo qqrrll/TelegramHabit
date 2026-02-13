@@ -16,4 +16,6 @@ public interface HabitCompletionRepository extends JpaRepository<HabitCompletion
     List<HabitCompletionEntity> findByHabitAndCompletedTrueOrderByDateDesc(HabitEntity habit);
 
     List<HabitCompletionEntity> findByHabitAndDateBetweenAndCompletedTrue(HabitEntity habit, LocalDate from, LocalDate to);
+
+    void deleteByHabit(HabitEntity habit);
 }

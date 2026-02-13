@@ -2,6 +2,7 @@ import type {
   AuthResponse,
   FriendInviteResponse,
   FriendResponse,
+  HabitReactionSummaryResponse,
   HabitResponse,
   HabitStatsResponse,
   UserProfileResponse
@@ -87,7 +88,15 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
       clearToken();
     }
     const errorText = await response.text();
-    throw new Error(errorText || `API error: ${response.status}`);
+    if (errorText) {
+      try {
+        const parsed = JSON.parse(errorText) as { error?: string; message?: string };
+        throw new Error(parsed.error ?? parsed.message ?? errorText);
+      } catch {
+        throw new Error(errorText);
+      }
+    }
+    throw new Error(`API error: ${response.status}`);
   }
   if (response.status === 204) {
     return undefined as T;
@@ -152,5 +161,20 @@ export function uploadHabitImage(habitId: string, file: File): Promise<HabitResp
   return apiRequest<HabitResponse>(`/api/habits/${habitId}/image`, {
     method: "POST",
     body: formData
+  });
+}
+
+export function deleteHabit(habitId: string): Promise<void> {
+  return apiRequest<void>(`/api/habits/${habitId}`, { method: "DELETE" });
+}
+
+export function getHabitReactions(friendId: string, habitId: string): Promise<HabitReactionSummaryResponse[]> {
+  return apiRequest<HabitReactionSummaryResponse[]>(`/api/friends/${friendId}/habits/${habitId}/reactions`);
+}
+
+export function toggleHabitReaction(friendId: string, habitId: string, emoji: string): Promise<HabitReactionSummaryResponse[]> {
+  return apiRequest<HabitReactionSummaryResponse[]>(`/api/friends/${friendId}/habits/${habitId}/reactions`, {
+    method: "POST",
+    body: JSON.stringify({ emoji })
   });
 }

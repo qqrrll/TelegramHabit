@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { apiRequest, resolveAssetUrl, uploadHabitImage } from "../api";
+import { apiRequest, deleteHabit, resolveAssetUrl, uploadHabitImage } from "../api";
 import { hapticImpact } from "../telegram";
 import type { HabitRequest, HabitResponse, HabitType } from "../types";
 
@@ -29,6 +29,8 @@ export function HabitFormPage() {
   const [imageUploading, setImageUploading] = useState(false);
   const [pendingImageFile, setPendingImageFile] = useState<File | null>(null);
   const [pendingImagePreviewUrl, setPendingImagePreviewUrl] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [archiveSaving, setArchiveSaving] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -130,6 +132,44 @@ export function HabitFormPage() {
     }
   };
 
+  const toggleArchive = async () => {
+    if (!id) return;
+    setArchiveSaving(true);
+    setError(null);
+    try {
+      const updated = await apiRequest<HabitResponse>(`/api/habits/${id}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          ...form,
+          archived: !form.archived,
+          timesPerWeek: form.type === "WEEKLY" ? form.timesPerWeek : null
+        } satisfies HabitRequest)
+      });
+      setForm((state) => ({ ...state, archived: updated.archived }));
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setArchiveSaving(false);
+    }
+  };
+
+  const onDelete = async () => {
+    if (!id) return;
+    const confirmed = window.confirm(t("deleteHabitConfirm"));
+    if (!confirmed) return;
+
+    setDeleting(true);
+    setError(null);
+    try {
+      await deleteHabit(id);
+      navigate("/");
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <section className="space-y-3 pb-8">
       <div className="glass-card p-4">
@@ -181,23 +221,26 @@ export function HabitFormPage() {
         </div>
 
         {form.type === "WEEKLY" && (
-          <label className="block">
+          <div>
             <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">{t("timesPerWeek")}</span>
-            <input
-              type="number"
-              min={1}
-              max={7}
-              className="w-full rounded-2xl bg-white/80 px-4 py-3 text-sm text-ink shadow-sm transition-all duration-200 focus:ring-2 focus:ring-sky-200"
-              value={form.timesPerWeek ?? 1}
-              onChange={(e) =>
-                setForm((s) => {
-                  const raw = Number(e.target.value);
-                  const safe = Number.isFinite(raw) ? Math.min(7, Math.max(1, raw)) : 1;
-                  return { ...s, timesPerWeek: safe };
-                })
-              }
-            />
-          </label>
+            <div className="grid grid-cols-7 gap-1 rounded-2xl bg-white/70 p-1">
+              {Array.from({ length: 7 }, (_, index) => index + 1).map((num) => (
+                <button
+                  key={num}
+                  type="button"
+                  className={`tap rounded-xl px-2 py-2 text-sm font-semibold transition-all duration-200 ${
+                    (form.timesPerWeek ?? 1) === num ? "bg-ink text-white shadow-sm" : "text-slate-500"
+                  }`}
+                  onClick={() => {
+                    hapticImpact("light");
+                    setForm((state) => ({ ...state, timesPerWeek: num }));
+                  }}
+                >
+                  {num}
+                </button>
+              ))}
+            </div>
+          </div>
         )}
 
         <div>
@@ -268,14 +311,24 @@ export function HabitFormPage() {
         </div>
 
         {id && (
-          <label className="flex items-center gap-2 rounded-2xl bg-white/70 px-3 py-2 text-sm text-slate-600">
-            <input
-              type="checkbox"
-              checked={form.archived}
-              onChange={(e) => setForm((s) => ({ ...s, archived: e.target.checked }))}
-            />
-            {t("archiveHabit")}
-          </label>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => void toggleArchive()}
+              disabled={archiveSaving}
+              className="tap rounded-2xl bg-white/80 px-3 py-2 text-sm font-semibold text-slate-600 shadow-sm disabled:opacity-50"
+            >
+              {archiveSaving ? t("saving") : form.archived ? t("unarchiveHabit") : t("archiveHabit")}
+            </button>
+            <button
+              type="button"
+              onClick={() => void onDelete()}
+              disabled={deleting}
+              className="tap rounded-2xl bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-600 shadow-sm disabled:opacity-50"
+            >
+              {deleting ? t("saving") : t("deleteHabit")}
+            </button>
+          </div>
         )}
       </div>
 

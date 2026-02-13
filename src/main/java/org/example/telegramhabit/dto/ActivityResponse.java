@@ -14,6 +14,7 @@ public record ActivityResponse(
         boolean ownEvent,
         ActivityType type,
         String message,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        long createdAtEpochMs
 ) {
 }

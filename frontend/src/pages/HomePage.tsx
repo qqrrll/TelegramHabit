@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { apiRequest, resolveAssetUrl } from "../api";
 import { hapticImpact } from "../telegram";
+import { ImageLightbox } from "../components/ImageLightbox";
 import { SkeletonList } from "../components/Skeleton";
 import type { HabitCompletionResponse, HabitResponse } from "../types";
 
@@ -64,6 +65,7 @@ export function HomePage() {
   const [highlightedHabitId, setHighlightedHabitId] = useState<string | null>(null);
   const [pressedHabitId, setPressedHabitId] = useState<string | null>(null);
   const [completeToast, setCompleteToast] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<{ src: string; alt: string } | null>(null);
   const [pullDistance, setPullDistance] = useState(0);
   const touchStartY = useRef<number | null>(null);
   const pulling = useRef(false);
@@ -150,6 +152,7 @@ export function HomePage() {
 
   return (
     <section className="space-y-3 pb-24" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+      {imagePreview && <ImageLightbox src={imagePreview.src} alt={imagePreview.alt} onClose={() => setImagePreview(null)} />}
       {completeToast && (
         <div className="glass-card sticky top-2 z-30 border-emerald-200 bg-emerald-50/90 px-3 py-2 text-center text-xs font-semibold text-emerald-700">
           {completeToast}
@@ -177,11 +180,18 @@ export function HomePage() {
           <div className="pr-16">
             <div className="flex items-start gap-3">
               {habit.imageUrl ? (
-                <img
-                  src={resolveAssetUrl(habit.imageUrl) ?? ""}
-                  alt={habit.title}
-                  className="mt-0.5 h-10 w-10 rounded-xl object-cover shadow-sm"
-                />
+                <button
+                  type="button"
+                  className="tap"
+                  onClick={() => {
+                    const src = resolveAssetUrl(habit.imageUrl);
+                    if (src) {
+                      setImagePreview({ src, alt: habit.title });
+                    }
+                  }}
+                >
+                  <img src={resolveAssetUrl(habit.imageUrl) ?? ""} alt={habit.title} className="mt-0.5 h-10 w-10 rounded-xl object-cover shadow-sm" />
+                </button>
               ) : (
                 <div className="mt-0.5 text-2xl">{habit.icon}</div>
               )}

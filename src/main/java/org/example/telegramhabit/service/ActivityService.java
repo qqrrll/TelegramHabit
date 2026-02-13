@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -52,7 +53,8 @@ public class ActivityService {
                         log.getUser().getId().equals(user.getId()),
                         log.getType(),
                         log.getMessage(),
-                        log.getCreatedAt()
+                        log.getCreatedAt(),
+                        log.getCreatedAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
                 ))
                 .toList();
     }

@@ -8,7 +8,9 @@ import org.example.telegramhabit.dto.HabitStatsResponse;
 import org.example.telegramhabit.entity.HabitEntity;
 import org.example.telegramhabit.entity.HabitType;
 import org.example.telegramhabit.entity.UserEntity;
+import org.example.telegramhabit.repository.ActivityLogRepository;
 import org.example.telegramhabit.repository.HabitCompletionRepository;
+import org.example.telegramhabit.repository.HabitReactionRepository;
 import org.example.telegramhabit.repository.HabitRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,8 @@ public class HabitService {
 
     private final HabitRepository habitRepository;
     private final HabitCompletionRepository completionRepository;
+    private final HabitReactionRepository habitReactionRepository;
+    private final ActivityLogRepository activityLogRepository;
     private final StreakService streakService;
     private final AvatarStorageService avatarStorageService;
 
@@ -78,6 +82,9 @@ public class HabitService {
     @Transactional
     public void delete(UserEntity user, UUID habitId) {
         HabitEntity habit = requireOwnedHabit(user, habitId);
+        completionRepository.deleteByHabit(habit);
+        habitReactionRepository.deleteByHabit(habit);
+        activityLogRepository.deleteByHabit(habit);
         habitRepository.delete(habit);
     }
 
@@ -156,6 +163,9 @@ public class HabitService {
         }
         if (request.type() == HabitType.WEEKLY && request.timesPerWeek() == null) {
             throw new IllegalArgumentException("timesPerWeek is required for WEEKLY habit");
+        }
+        if (request.type() == HabitType.WEEKLY && (request.timesPerWeek() < 1 || request.timesPerWeek() > 7)) {
+            throw new IllegalArgumentException("timesPerWeek must be between 1 and 7 for WEEKLY habit");
         }
     }
 

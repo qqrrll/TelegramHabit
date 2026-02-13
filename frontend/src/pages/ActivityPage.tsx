@@ -11,7 +11,7 @@ type FeedFilter = "all" | "mine" | "friends";
 function groupByDate(items: ActivityResponse[]): Array<{ date: string; items: ActivityResponse[] }> {
   const map = new Map<string, ActivityResponse[]>();
   for (const item of items) {
-    const date = new Date(item.createdAt).toLocaleDateString();
+    const date = new Date(item.createdAtEpochMs).toLocaleDateString();
     const list = map.get(date) ?? [];
     list.push(item);
     map.set(date, list);
@@ -19,9 +19,9 @@ function groupByDate(items: ActivityResponse[]): Array<{ date: string; items: Ac
   return Array.from(map.entries()).map(([date, grouped]) => ({ date, items: grouped }));
 }
 
-function relativeTime(ts: string, locale: string): string {
+function relativeTime(ts: number, locale: string): string {
   const now = Date.now();
-  const target = new Date(ts).getTime();
+  const target = ts;
   const diffSec = Math.round((target - now) / 1000);
   const abs = Math.abs(diffSec);
   const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
@@ -151,7 +151,7 @@ export function ActivityPage() {
                       </div>
                     </div>
                   </div>
-                  <time className="text-xs text-slate-400">{relativeTime(item.createdAt, i18n.language)}</time>
+                  <time className="text-xs text-slate-400">{relativeTime(item.createdAtEpochMs, i18n.language)}</time>
                 </div>
                 <p className="mt-3 text-sm font-medium text-slate-700">{item.message}</p>
                 {item.habitId && (

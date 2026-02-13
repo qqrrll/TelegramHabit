@@ -40,6 +40,7 @@ export interface ActivityResponse {
   type: "COMPLETED" | "STREAK" | "RECORD";
   message: string;
   createdAt: string;
+  createdAtEpochMs: number;
 }
 
 export interface FriendResponse {
@@ -72,6 +73,12 @@ export interface HabitCompletionResponse {
   date: string;
   completed: boolean;
   createdAt: string;
+}
+
+export interface HabitReactionSummaryResponse {
+  emoji: string;
+  count: number;
+  mine: boolean;
 }
 
 export interface UserProfileResponse {
