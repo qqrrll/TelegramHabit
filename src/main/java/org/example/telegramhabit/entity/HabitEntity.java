@@ -17,13 +17,14 @@ import lombok.ToString;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/** Habit settings owned by a single user. */
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(exclude = "user")
 @NoArgsConstructor
 @Entity
 @Table(name = "habit")
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public class HabitEntity {
 
     @Id

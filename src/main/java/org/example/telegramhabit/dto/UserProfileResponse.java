@@ -2,7 +2,8 @@ package org.example.telegramhabit.dto;
 
 import java.util.UUID;
 
-/** User profile payload for mini-app settings screen. */
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public record UserProfileResponse(
         UUID id,
         Long telegramId,

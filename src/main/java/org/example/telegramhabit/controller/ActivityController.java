@@ -12,16 +12,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/** Returns activity feed for authenticated user and their friends. */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/activity")
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public class ActivityController {
 
     private final ActivityService activityService;
     private final UserService userService;
 
     @GetMapping
+    // Что делает: читает и возвращает данные для API или внутренней логики.
+    // Как делает: делает запрос к репозиторию, при необходимости фильтрует и маппит результат.
     public List<ActivityResponse> list() {
         UserEntity user = userService.requireById(SecurityUtils.currentUserId());
         return activityService.list(user);

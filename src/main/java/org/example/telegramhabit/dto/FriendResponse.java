@@ -2,7 +2,8 @@ package org.example.telegramhabit.dto;
 
 import java.util.UUID;
 
-/** Minimal friend profile used in friends tab. */
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public record FriendResponse(
         UUID id,
         String username,

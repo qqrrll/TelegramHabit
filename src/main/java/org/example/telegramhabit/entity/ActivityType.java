@@ -1,6 +1,7 @@
 package org.example.telegramhabit.entity;
 
-/** Types of feed events displayed in activity list. */
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public enum ActivityType {
     COMPLETED,
     STREAK,

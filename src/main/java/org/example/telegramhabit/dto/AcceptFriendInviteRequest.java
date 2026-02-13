@@ -2,6 +2,7 @@ package org.example.telegramhabit.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
-/** Accepts friend invite by code (from link or manual input). */
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public record AcceptFriendInviteRequest(@NotBlank String code) {
 }

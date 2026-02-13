@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.UUID;
 import org.example.telegramhabit.entity.HabitEntity;
 
-/** JPA access for recent activity feed records. */
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public interface ActivityLogRepository extends JpaRepository<ActivityLogEntity, UUID> {
     List<ActivityLogEntity> findTop100ByUserOrderByCreatedAtDesc(UserEntity user);
 

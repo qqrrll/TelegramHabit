@@ -19,7 +19,8 @@ import java.util.List;
 
 @Configuration
 @EnableMethodSecurity
-/** Stateless JWT-based security rules for API endpoints. */
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public class SecurityConfig {
 
     @Value("${app.cors.allowed-origins}")
@@ -41,6 +42,8 @@ public class SecurityConfig {
     }
 
     @Bean
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(

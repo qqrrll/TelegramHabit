@@ -15,8 +15,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.UUID;
 
-/** Creates and validates JWT tokens used by API. */
 @Service
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public class JwtService {
 
     @Value("${app.security.jwt-secret}")
@@ -32,6 +33,8 @@ public class JwtService {
         this.secretKey = Keys.hmacShaKeyFor(resolveSecret(secret));
     }
 
+    // Что делает: создаёт или сохраняет данные и возвращает результат операции.
+    // Как делает: валидирует вход, заполняет поля, сохраняет в БД или хранилище и возвращает итог.
     public String generate(UUID userId) {
         Instant now = Instant.now();
         return Jwts.builder()
@@ -42,6 +45,8 @@ public class JwtService {
                 .compact();
     }
 
+    // Что делает: проверяет входные данные и извлекает нужные значения.
+    // Как делает: проводит проверки и возвращает значение, либо бросает исключение при ошибке.
     public UUID extractUserId(String token) {
         Claims claims = Jwts.parser()
                 .verifyWith(secretKey)
@@ -51,6 +56,8 @@ public class JwtService {
         return UUID.fromString(claims.getSubject());
     }
 
+    // Что делает: преобразует или обновляет данные по правилам сервиса.
+    // Как делает: применяет правила преобразования, затем сохраняет или возвращает обновлённые данные.
     private byte[] resolveSecret(String value) {
         if (value.matches("^[A-Za-z0-9+/=]+$") && value.length() >= 44) {
             try {

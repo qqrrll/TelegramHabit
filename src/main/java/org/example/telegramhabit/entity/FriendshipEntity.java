@@ -15,13 +15,14 @@ import lombok.ToString;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/** Directed friendship edge. For mutual friendship two rows are stored. */
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(exclude = {"user", "friend"})
 @NoArgsConstructor
 @Entity
 @Table(name = "friendship")
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public class FriendshipEntity {
 
     @Id

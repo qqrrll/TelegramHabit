@@ -31,10 +31,11 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-/** Protected endpoints for habits, completions and stats. */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/habits")
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public class HabitController {
 
     private final HabitService habitService;
@@ -42,39 +43,53 @@ public class HabitController {
     private final UserService userService;
 
     @GetMapping
+    // Что делает: читает и возвращает данные для API или внутренней логики.
+    // Как делает: делает запрос к репозиторию, при необходимости фильтрует и маппит результат.
     public List<HabitResponse> list() {
         return habitService.list(currentUser());
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    // Что делает: создаёт или сохраняет данные и возвращает результат операции.
+    // Как делает: валидирует вход, заполняет поля, сохраняет в БД или хранилище и возвращает итог.
     public HabitResponse create(@Valid @RequestBody HabitRequest request) {
         return habitService.create(currentUser(), request);
     }
 
     @PutMapping("/{id}")
+    // Что делает: преобразует или обновляет данные по правилам сервиса.
+    // Как делает: применяет правила преобразования, затем сохраняет или возвращает обновлённые данные.
     public HabitResponse update(@PathVariable UUID id, @Valid @RequestBody HabitRequest request) {
         return habitService.update(currentUser(), id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    // Что делает: удаляет данные по условиям метода с учётом связей.
+    // Как делает: проверяет доступ и существование сущности, затем удаляет связанные и целевые записи.
     public void delete(@PathVariable UUID id) {
         habitService.delete(currentUser(), id);
     }
 
     @PostMapping("/{id}/complete")
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     public HabitCompletionResponse complete(@PathVariable UUID id) {
         return completionService.complete(currentUser(), id);
     }
 
     @PostMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    // Что делает: создаёт или сохраняет данные и возвращает результат операции.
+    // Как делает: валидирует вход, заполняет поля, сохраняет в БД или хранилище и возвращает итог.
     public HabitResponse uploadImage(@PathVariable UUID id, @RequestPart("file") MultipartFile file) {
         return habitService.uploadImage(currentUser(), id, file);
     }
 
     @DeleteMapping("/{id}/complete")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     public void uncomplete(
             @PathVariable UUID id,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
@@ -83,15 +98,21 @@ public class HabitController {
     }
 
     @GetMapping("/{id}/history")
+    // Что делает: читает и возвращает данные для API или внутренней логики.
+    // Как делает: делает запрос к репозиторию, при необходимости фильтрует и маппит результат.
     public List<HabitCompletionResponse> history(@PathVariable UUID id) {
         return completionService.history(currentUser(), id);
     }
 
     @GetMapping("/{id}/stats")
+    // Что делает: читает и возвращает данные для API или внутренней логики.
+    // Как делает: делает запрос к репозиторию, при необходимости фильтрует и маппит результат.
     public HabitStatsResponse stats(@PathVariable UUID id) {
         return habitService.stats(currentUser(), id);
     }
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private UserEntity currentUser() {
         return userService.requireById(SecurityUtils.currentUserId());
     }

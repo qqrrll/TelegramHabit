@@ -12,10 +12,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Public endpoint for Telegram authentication. */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public class AuthController {
 
     private final AuthService authService;
@@ -24,11 +25,15 @@ public class AuthController {
     private boolean devAuthEnabled;
 
     @PostMapping("/telegram")
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     public AuthResponse telegram(@Valid @RequestBody TelegramAuthRequest request) {
         return authService.authenticateTelegram(request.initData());
     }
 
     @PostMapping("/dev")
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     public AuthResponse dev(@Valid @RequestBody DevAuthRequest request) {
         if (!devAuthEnabled) {
             throw new IllegalStateException("Dev auth is disabled");

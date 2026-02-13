@@ -24,9 +24,10 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.UUID;
 
-/** Core CRUD and stats logic for habits. */
 @Service
 @RequiredArgsConstructor
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public class HabitService {
 
     private final HabitRepository habitRepository;
@@ -37,6 +38,8 @@ public class HabitService {
     private final AvatarStorageService avatarStorageService;
 
     @Transactional(readOnly = true)
+    // Что делает: читает и возвращает данные для API или внутренней логики.
+    // Как делает: делает запрос к репозиторию, при необходимости фильтрует и маппит результат.
     public List<HabitResponse> list(UserEntity user) {
         return habitRepository.findByUserOrderByCreatedAtDesc(user).stream()
                 .map(this::toResponse)
@@ -44,6 +47,8 @@ public class HabitService {
     }
 
     @Transactional(readOnly = true)
+    // Что делает: читает и возвращает данные для API или внутренней логики.
+    // Как делает: делает запрос к репозиторию, при необходимости фильтрует и маппит результат.
     public List<HabitResponse> listByOwner(UserEntity owner) {
         return habitRepository.findByUserOrderByCreatedAtDesc(owner).stream()
                 .map(this::toResponse)
@@ -51,6 +56,8 @@ public class HabitService {
     }
 
     @Transactional
+    // Что делает: создаёт или сохраняет данные и возвращает результат операции.
+    // Как делает: валидирует вход, заполняет поля, сохраняет в БД или хранилище и возвращает итог.
     public HabitResponse create(UserEntity user, HabitRequest request) {
         validateRequest(request);
         HabitEntity habit = new HabitEntity();
@@ -67,6 +74,8 @@ public class HabitService {
     }
 
     @Transactional
+    // Что делает: преобразует или обновляет данные по правилам сервиса.
+    // Как делает: применяет правила преобразования, затем сохраняет или возвращает обновлённые данные.
     public HabitResponse update(UserEntity user, UUID habitId, HabitRequest request) {
         validateRequest(request);
         HabitEntity habit = requireOwnedHabit(user, habitId);
@@ -80,6 +89,8 @@ public class HabitService {
     }
 
     @Transactional
+    // Что делает: удаляет данные по условиям метода с учётом связей.
+    // Как делает: проверяет доступ и существование сущности, затем удаляет связанные и целевые записи.
     public void delete(UserEntity user, UUID habitId) {
         HabitEntity habit = requireOwnedHabit(user, habitId);
         completionRepository.deleteByHabit(habit);
@@ -89,17 +100,23 @@ public class HabitService {
     }
 
     @Transactional(readOnly = true)
+    // Что делает: читает и возвращает данные для API или внутренней логики.
+    // Как делает: делает запрос к репозиторию, при необходимости фильтрует и маппит результат.
     public HabitStatsResponse stats(UserEntity user, UUID habitId) {
         HabitEntity habit = requireOwnedHabit(user, habitId);
         return statsForHabit(habit);
     }
 
     @Transactional(readOnly = true)
+    // Что делает: читает и возвращает данные для API или внутренней логики.
+    // Как делает: делает запрос к репозиторию, при необходимости фильтрует и маппит результат.
     public HabitStatsResponse statsByOwner(UserEntity owner, UUID habitId) {
         HabitEntity habit = requireOwnedHabit(owner, habitId);
         return statsForHabit(habit);
     }
 
+    // Что делает: читает и возвращает данные для API или внутренней логики.
+    // Как делает: делает запрос к репозиторию, при необходимости фильтрует и маппит результат.
     private HabitStatsResponse statsForHabit(HabitEntity habit) {
         LocalDate now = LocalDate.now();
         LocalDate weekStart = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
@@ -127,12 +144,16 @@ public class HabitService {
         );
     }
 
+    // Что делает: проверяет входные данные и извлекает нужные значения.
+    // Как делает: проводит проверки и возвращает значение, либо бросает исключение при ошибке.
     public HabitEntity requireOwnedHabit(UserEntity user, UUID habitId) {
         return habitRepository.findByIdAndUser(habitId, user)
                 .orElseThrow(() -> new EntityNotFoundException("Habit not found"));
     }
 
     @Transactional
+    // Что делает: создаёт или сохраняет данные и возвращает результат операции.
+    // Как делает: валидирует вход, заполняет поля, сохраняет в БД или хранилище и возвращает итог.
     public HabitResponse uploadImage(UserEntity user, UUID habitId, MultipartFile file) {
         HabitEntity habit = requireOwnedHabit(user, habitId);
         String imageUrl = avatarStorageService.saveHabitImage(file);
@@ -140,6 +161,8 @@ public class HabitService {
         return toResponse(habitRepository.save(habit));
     }
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private HabitResponse toResponse(HabitEntity habit) {
         return new HabitResponse(
                 habit.getId(),
@@ -156,7 +179,8 @@ public class HabitService {
         );
     }
 
-    // Keep DTO consistency with DB checks for clearer API errors.
+    // Что делает: проверяет входные данные и извлекает нужные значения.
+    // Как делает: проводит проверки и возвращает значение, либо бросает исключение при ошибке.
     private void validateRequest(HabitRequest request) {
         if (request.type() == HabitType.DAILY && request.timesPerWeek() != null) {
             throw new IllegalArgumentException("timesPerWeek must be null for DAILY habit");
@@ -169,6 +193,8 @@ public class HabitService {
         }
     }
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private int percent(int completed, int target) {
         if (target <= 0) {
             return 0;

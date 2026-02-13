@@ -16,13 +16,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/** Stores completion marks by date for each habit. */
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(exclude = "habit")
 @NoArgsConstructor
 @Entity
 @Table(name = "habit_completion")
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public class HabitCompletionEntity {
 
     @Id

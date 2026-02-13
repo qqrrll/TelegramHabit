@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-/** JPA access for habits scoped by owner. */
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public interface HabitRepository extends JpaRepository<HabitEntity, UUID> {
     List<HabitEntity> findByUserOrderByCreatedAtDesc(UserEntity user);
     List<HabitEntity> findByUserAndArchivedFalseOrderByCreatedAtDesc(UserEntity user);

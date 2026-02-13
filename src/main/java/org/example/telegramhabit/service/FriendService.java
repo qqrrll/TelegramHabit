@@ -19,9 +19,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-/** Friend graph and invite-link workflow. */
 @Service
 @RequiredArgsConstructor
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public class FriendService {
 
     private final FriendshipRepository friendshipRepository;
@@ -37,6 +38,8 @@ public class FriendService {
     private String miniAppShortName;
 
     @Transactional(readOnly = true)
+    // Что делает: читает и возвращает данные для API или внутренней логики.
+    // Как делает: делает запрос к репозиторию, при необходимости фильтрует и маппит результат.
     public List<FriendResponse> listFriends(UserEntity user) {
         return friendshipRepository.findByUser(user).stream()
                 .map(edge -> {
@@ -53,6 +56,8 @@ public class FriendService {
     }
 
     @Transactional
+    // Что делает: создаёт или сохраняет данные и возвращает результат операции.
+    // Как делает: валидирует вход, заполняет поля, сохраняет в БД или хранилище и возвращает итог.
     public FriendInviteResponse createInvite(UserEntity user) {
         FriendInviteEntity invite = new FriendInviteEntity();
         invite.setId(UUID.randomUUID());
@@ -66,6 +71,8 @@ public class FriendService {
     }
 
     @Transactional
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     public FriendResponse acceptInvite(UserEntity user, String code) {
         FriendInviteEntity invite = friendInviteRepository.findByCode(code)
                 .orElseThrow(() -> new EntityNotFoundException("Invite not found"));
@@ -90,6 +97,8 @@ public class FriendService {
     }
 
     @Transactional(readOnly = true)
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     public List<UserEntity> friendsOf(UserEntity user) {
         return friendshipRepository.findByUser(user).stream()
                 .map(FriendshipEntity::getFriend)
@@ -97,6 +106,8 @@ public class FriendService {
     }
 
     @Transactional
+    // Что делает: удаляет данные по условиям метода с учётом связей.
+    // Как делает: проверяет доступ и существование сущности, затем удаляет связанные и целевые записи.
     public void removeFriend(UserEntity user, UUID friendId) {
         UserEntity friend = requireFriend(user, friendId);
 
@@ -105,6 +116,8 @@ public class FriendService {
     }
 
     @Transactional(readOnly = true)
+    // Что делает: проверяет входные данные и извлекает нужные значения.
+    // Как делает: проводит проверки и возвращает значение, либо бросает исключение при ошибке.
     public UserEntity requireFriend(UserEntity user, UUID friendId) {
         return friendsOf(user).stream()
                 .filter(candidate -> candidate.getId().equals(friendId))
@@ -113,10 +126,14 @@ public class FriendService {
     }
 
     @Transactional(readOnly = true)
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     public FriendResponse friendProfile(UserEntity user, UUID friendId) {
         return toFriendResponse(requireFriend(user, friendId));
     }
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private String buildInviteUrl(String code) {
         String encoded = URLEncoder.encode("friend_" + code, StandardCharsets.UTF_8);
         if (!botUsername.isBlank() && !miniAppShortName.isBlank()) {
@@ -125,6 +142,8 @@ public class FriendService {
         return inviteBaseUrl + "?code=" + code;
     }
 
+    // Что делает: создаёт или сохраняет данные и возвращает результат операции.
+    // Как делает: валидирует вход, заполняет поля, сохраняет в БД или хранилище и возвращает итог.
     private void createEdgeIfMissing(UserEntity user, UserEntity friend) {
         if (friendshipRepository.findByUserAndFriend(user, friend).isPresent()) {
             return;
@@ -137,6 +156,8 @@ public class FriendService {
         friendshipRepository.save(edge);
     }
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private FriendResponse toFriendResponse(UserEntity friend) {
         return new FriendResponse(
                 friend.getId(),

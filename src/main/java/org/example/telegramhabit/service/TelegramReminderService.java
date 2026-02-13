@@ -22,9 +22,10 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
-/** Sends one daily reminder to users who have unfinished active habits. */
 @Service
 @RequiredArgsConstructor
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public class TelegramReminderService {
 
     private final UserRepository userRepository;
@@ -32,6 +33,8 @@ public class TelegramReminderService {
     private final HabitCompletionRepository completionRepository;
     private final ReminderLogRepository reminderLogRepository;
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private final RestClient restClient = RestClient.create();
 
     @Value("${app.telegram.bot-token:change-me}")
@@ -48,6 +51,8 @@ public class TelegramReminderService {
 
     @Scheduled(cron = "${app.telegram.reminders.cron:0 */30 * * * *}")
     @Transactional
+    // Что делает: отправляет сообщение или запрос во внешний сервис и возвращает статус.
+    // Как делает: формирует внешний HTTP-запрос, отправляет его и обрабатывает возможные ошибки.
     public void sendDailyReminders() {
         if (!remindersEnabled || botToken == null || botToken.isBlank() || "change-me".equals(botToken)) {
             return;
@@ -89,6 +94,8 @@ public class TelegramReminderService {
         }
     }
 
+    // Что делает: отправляет сообщение или запрос во внешний сервис и возвращает статус.
+    // Как делает: формирует внешний HTTP-запрос, отправляет его и обрабатывает возможные ошибки.
     private boolean sendReminder(Long chatId, String text) {
         try {
             restClient.post()
@@ -102,6 +109,8 @@ public class TelegramReminderService {
         }
     }
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private String reminderText(UserEntity user, long pendingCount) {
         if (user.getLanguage() != null && user.getLanguage().equalsIgnoreCase("ru")) {
             return "Напоминание: сегодня осталось отметить " + pendingCount + " привычк(и).";
@@ -109,6 +118,8 @@ public class TelegramReminderService {
         return "Reminder: you still have " + pendingCount + " habit(s) to complete today.";
     }
 
+    // Что делает: отправляет сообщение или запрос во внешний сервис и возвращает статус.
+    // Как делает: формирует внешний HTTP-запрос, отправляет его и обрабатывает возможные ошибки.
     private record SendMessageRequest(Long chat_id, String text) {
     }
 }

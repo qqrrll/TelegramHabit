@@ -16,13 +16,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/** Ensures bot reminder is sent at most once per user per date. */
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(exclude = "user")
 @NoArgsConstructor
 @Entity
 @Table(name = "reminder_log")
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public class ReminderLogEntity {
 
     @Id

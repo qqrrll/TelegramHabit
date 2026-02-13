@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public interface HabitReactionRepository extends JpaRepository<HabitReactionEntity, UUID> {
 
     Optional<HabitReactionEntity> findByHabitAndReactorAndEmoji(HabitEntity habit, UserEntity reactor, String emoji);
@@ -26,6 +28,8 @@ public interface HabitReactionRepository extends JpaRepository<HabitReactionEnti
             """)
     List<ReactionCountProjection> countByHabit(@Param("habit") HabitEntity habit);
 
+    // Что делает: описывает ключевой компонент backend-слоя приложения.
+    // Как делает: объявляет структуру и контракт, который используют остальные части системы.
     interface ReactionCountProjection {
         String getEmoji();
 

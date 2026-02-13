@@ -17,9 +17,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/** Verifies Telegram WebApp initData signature and parses user payload. */
 @Component
 @RequiredArgsConstructor
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public class TelegramInitDataValidator {
 
     private final ObjectMapper objectMapper;
@@ -27,6 +28,8 @@ public class TelegramInitDataValidator {
     @Value("${app.telegram.bot-token}")
     private String botToken;
 
+    // Что делает: проверяет входные данные и извлекает нужные значения.
+    // Как делает: проводит проверки и возвращает значение, либо бросает исключение при ошибке.
     public TelegramUserData validateAndExtract(String initData) {
         Map<String, String> values = parse(initData);
         String hash = values.get("hash");
@@ -71,7 +74,8 @@ public class TelegramInitDataValidator {
         }
     }
 
-    // Parses query-string style initData into key/value map.
+    // Что делает: проверяет входные данные и извлекает нужные значения.
+    // Как делает: проводит проверки и возвращает значение, либо бросает исключение при ошибке.
     private Map<String, String> parse(String initData) {
         Map<String, String> values = new HashMap<>();
         String[] pairs = initData.split("&");
@@ -87,6 +91,8 @@ public class TelegramInitDataValidator {
         return values;
     }
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private byte[] sha256(String prefix, String value) {
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
@@ -97,6 +103,8 @@ public class TelegramInitDataValidator {
         }
     }
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private String hmacSha256Hex(byte[] secret, String value) {
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
@@ -112,11 +120,15 @@ public class TelegramInitDataValidator {
         }
     }
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private String asText(JsonNode node, String field) {
         JsonNode value = node.get(field);
         return value == null || value.isNull() ? null : value.asText();
     }
 
+    // Что делает: преобразует или обновляет данные по правилам сервиса.
+    // Как делает: применяет правила преобразования, затем сохраняет или возвращает обновлённые данные.
     private String normalizeLanguage(String raw) {
         if (raw == null || raw.isBlank()) {
             return "en";
@@ -128,6 +140,8 @@ public class TelegramInitDataValidator {
         };
     }
 
+    // Что делает: описывает ключевой компонент backend-слоя приложения.
+    // Как делает: объявляет структуру и контракт, который используют остальные части системы.
     public record TelegramUserData(
             Long telegramId,
             String username,

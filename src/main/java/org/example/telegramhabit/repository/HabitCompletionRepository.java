@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-/** JPA access for habit completion marks. */
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public interface HabitCompletionRepository extends JpaRepository<HabitCompletionEntity, UUID> {
     Optional<HabitCompletionEntity> findByHabitAndDate(HabitEntity habit, LocalDate date);
 

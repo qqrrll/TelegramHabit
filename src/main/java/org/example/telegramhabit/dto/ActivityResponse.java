@@ -5,6 +5,8 @@ import org.example.telegramhabit.entity.ActivityType;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public record ActivityResponse(
         UUID id,
         UUID habitId,

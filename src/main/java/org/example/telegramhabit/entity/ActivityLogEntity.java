@@ -17,13 +17,14 @@ import lombok.ToString;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/** Activity feed entry for completion, streak or record events. */
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(exclude = {"user", "habit"})
 @NoArgsConstructor
 @Entity
 @Table(name = "activity_log")
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public class ActivityLogEntity {
 
     @Id

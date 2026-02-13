@@ -1,5 +1,6 @@
 package org.example.telegramhabit.dto;
 
-/** Invite code and shareable URL for friend onboarding. */
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public record FriendInviteResponse(String code, String inviteUrl, String expiresAt) {
 }

@@ -15,13 +15,14 @@ import lombok.ToString;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/** One-time invite used to connect two users as friends. */
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(exclude = "inviter")
 @NoArgsConstructor
 @Entity
 @Table(name = "friend_invite")
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public class FriendInviteEntity {
 
     @Id

@@ -16,9 +16,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-/** Completion/uncompletion operations and related activity events. */
 @Service
 @RequiredArgsConstructor
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public class HabitCompletionService {
 
     private final HabitCompletionRepository completionRepository;
@@ -27,6 +28,8 @@ public class HabitCompletionService {
     private final StreakService streakService;
 
     @Transactional
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     public HabitCompletionResponse complete(UserEntity user, UUID habitId) {
         HabitEntity habit = habitService.requireOwnedHabit(user, habitId);
         LocalDate today = LocalDate.now();
@@ -40,7 +43,6 @@ public class HabitCompletionService {
                     return newCompletion;
                 });
 
-        // Idempotent completion: repeated tap for the same day should not create duplicate activity events.
         if (completion.isCompleted()) {
             return toResponse(completion);
         }
@@ -54,12 +56,16 @@ public class HabitCompletionService {
     }
 
     @Transactional
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     public void uncomplete(UserEntity user, UUID habitId, LocalDate date) {
         HabitEntity habit = habitService.requireOwnedHabit(user, habitId);
         completionRepository.findByHabitAndDate(habit, date).ifPresent(completionRepository::delete);
     }
 
     @Transactional(readOnly = true)
+    // Что делает: читает и возвращает данные для API или внутренней логики.
+    // Как делает: делает запрос к репозиторию, при необходимости фильтрует и маппит результат.
     public List<HabitCompletionResponse> history(UserEntity user, UUID habitId) {
         HabitEntity habit = habitService.requireOwnedHabit(user, habitId);
         return completionRepository.findByHabitAndCompletedTrueOrderByDateDesc(habit).stream()
@@ -67,6 +73,8 @@ public class HabitCompletionService {
                 .toList();
     }
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private HabitCompletionResponse toResponse(HabitCompletionEntity completion) {
         return new HabitCompletionResponse(
                 completion.getId(),
@@ -76,6 +84,8 @@ public class HabitCompletionService {
         );
     }
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private void emitStreakEvents(UserEntity user, HabitEntity habit) {
         int current = streakService.currentStreak(habit);
         int best = streakService.bestStreak(habit);
@@ -87,6 +97,8 @@ public class HabitCompletionService {
         }
     }
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private String completedMessage(UserEntity user, HabitEntity habit) {
         if (isRu(user)) {
             return "Выполнена привычка: " + habit.getTitle();
@@ -94,6 +106,8 @@ public class HabitCompletionService {
         return "Completed habit: " + habit.getTitle();
     }
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private String streakMessage(UserEntity user, HabitEntity habit, int current) {
         if (isRu(user)) {
             return "Серия " + current + " дней для " + habit.getTitle();
@@ -101,6 +115,8 @@ public class HabitCompletionService {
         return current + " days streak for " + habit.getTitle();
     }
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private String recordMessage(UserEntity user, HabitEntity habit, int best) {
         if (isRu(user)) {
             return "Новый рекорд: " + best + " для " + habit.getTitle();
@@ -108,6 +124,8 @@ public class HabitCompletionService {
         return "New record: " + best + " for " + habit.getTitle();
     }
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private boolean isRu(UserEntity user) {
         return user.getLanguage() != null && user.getLanguage().equalsIgnoreCase("ru");
     }

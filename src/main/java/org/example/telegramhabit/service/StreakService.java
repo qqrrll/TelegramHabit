@@ -14,13 +14,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/** Calculates current and best streak for daily and weekly habits. */
 @Service
 @RequiredArgsConstructor
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public class StreakService {
 
     private final HabitCompletionRepository completionRepository;
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     public int currentStreak(HabitEntity habit) {
         if (habit.getType() == HabitType.DAILY) {
             return currentDailyStreak(habit);
@@ -28,6 +31,8 @@ public class StreakService {
         return currentWeeklyStreak(habit);
     }
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     public int bestStreak(HabitEntity habit) {
         if (habit.getType() == HabitType.DAILY) {
             return bestDailyStreak(habit);
@@ -35,6 +40,8 @@ public class StreakService {
         return bestWeeklyStreak(habit);
     }
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private int currentDailyStreak(HabitEntity habit) {
         List<LocalDate> dates = completionRepository.findByHabitAndCompletedTrueOrderByDateDesc(habit).stream()
                 .map(HabitCompletionEntity::getDate)
@@ -42,6 +49,8 @@ public class StreakService {
         return currentDailyFromDates(dates, LocalDate.now());
     }
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private int bestDailyStreak(HabitEntity habit) {
         List<LocalDate> dates = completionRepository.findByHabitAndCompletedTrueOrderByDateDesc(habit).stream()
                 .map(HabitCompletionEntity::getDate)
@@ -63,6 +72,8 @@ public class StreakService {
         return best;
     }
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private int currentWeeklyStreak(HabitEntity habit) {
         List<LocalDate> dates = completionRepository.findByHabitAndCompletedTrueOrderByDateDesc(habit).stream()
                 .map(HabitCompletionEntity::getDate)
@@ -81,6 +92,8 @@ public class StreakService {
         return streak;
     }
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private int bestWeeklyStreak(HabitEntity habit) {
         List<LocalDate> dates = completionRepository.findByHabitAndCompletedTrueOrderByDateDesc(habit).stream()
                 .map(HabitCompletionEntity::getDate)
@@ -107,6 +120,8 @@ public class StreakService {
         return best;
     }
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private boolean isWeekCompleted(Set<LocalDate> completionDates, LocalDate weekStart, Integer timesPerWeek) {
         if (timesPerWeek == null) {
             return false;
@@ -120,7 +135,8 @@ public class StreakService {
         return count >= timesPerWeek;
     }
 
-    // For daily habits we count backwards from today (or yesterday if today is not completed).
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private int currentDailyFromDates(List<LocalDate> descDates, LocalDate today) {
         if (descDates.isEmpty()) {
             return 0;

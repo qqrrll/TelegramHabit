@@ -11,9 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/** Handles Telegram sign-in and JWT issuance. */
 @Service
 @RequiredArgsConstructor
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public class AuthService {
 
     private final TelegramInitDataValidator initDataValidator;
@@ -21,6 +22,8 @@ public class AuthService {
     private final JwtService jwtService;
 
     @Transactional
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     public AuthResponse authenticateTelegram(String initData) {
         TelegramInitDataValidator.TelegramUserData data = initDataValidator.validateAndExtract(initData);
         return upsertAndIssueToken(
@@ -34,10 +37,14 @@ public class AuthService {
     }
 
     @Transactional
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     public AuthResponse authenticateDev(Long telegramId, String firstName, String username) {
         return upsertAndIssueToken(telegramId, firstName, null, username, null, "en");
     }
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private AuthResponse upsertAndIssueToken(
             Long telegramId,
             String firstName,
@@ -69,7 +76,8 @@ public class AuthService {
         return new AuthResponse(token, user.getId(), user.getFirstName(), user.getUsername());
     }
 
-    // Keep uploaded local avatar on subsequent logins.
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private boolean canOverridePhoto(UserEntity user, String incomingPhotoUrl) {
         if (incomingPhotoUrl == null || incomingPhotoUrl.isBlank()) {
             return false;

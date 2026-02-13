@@ -1,6 +1,7 @@
 package org.example.telegramhabit.entity;
 
-/** Supported scheduling strategies for a habit. */
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public enum HabitType {
     DAILY,
     WEEKLY

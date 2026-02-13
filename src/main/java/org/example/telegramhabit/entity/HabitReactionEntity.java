@@ -15,13 +15,14 @@ import lombok.ToString;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/** Emoji reaction from one user to a friend's habit. */
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(exclude = {"habit", "reactor"})
 @NoArgsConstructor
 @Entity
 @Table(name = "habit_reaction")
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public class HabitReactionEntity {
 
     @Id

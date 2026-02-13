@@ -14,15 +14,18 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-/** Serves uploaded files stored in database. */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/files")
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public class FileController {
 
     private final AvatarStorageService avatarStorageService;
 
     @GetMapping("/{id}")
+    // Что делает: читает и возвращает данные для API или внутренней логики.
+    // Как делает: делает запрос к репозиторию, при необходимости фильтрует и маппит результат.
     public ResponseEntity<byte[]> get(@PathVariable UUID id) {
         StoredImageEntity image = avatarStorageService.requireImage(id);
         return ResponseEntity.ok()

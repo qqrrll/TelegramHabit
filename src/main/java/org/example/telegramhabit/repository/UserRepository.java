@@ -6,7 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 import java.util.UUID;
 
-/** JPA access for application users. */
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public interface UserRepository extends JpaRepository<UserEntity, UUID> {
     Optional<UserEntity> findByTelegramId(Long telegramId);
 }

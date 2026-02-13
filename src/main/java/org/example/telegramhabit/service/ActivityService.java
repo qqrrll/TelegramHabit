@@ -16,15 +16,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/** Writes and reads activity feed events. */
 @Service
 @RequiredArgsConstructor
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public class ActivityService {
 
     private final ActivityLogRepository activityLogRepository;
     private final FriendService friendService;
 
     @Transactional
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     public void log(UserEntity user, HabitEntity habit, ActivityType type, String message) {
         ActivityLogEntity log = new ActivityLogEntity();
         log.setId(UUID.randomUUID());
@@ -37,8 +40,9 @@ public class ActivityService {
     }
 
     @Transactional(readOnly = true)
+    // Что делает: читает и возвращает данные для API или внутренней логики.
+    // Как делает: делает запрос к репозиторию, при необходимости фильтрует и маппит результат.
     public List<ActivityResponse> list(UserEntity user) {
-        // Feed scope includes own and friends events to support social tab.
         List<UserEntity> feedUsers = new ArrayList<>();
         feedUsers.add(user);
         feedUsers.addAll(friendService.friendsOf(user));
@@ -59,6 +63,8 @@ public class ActivityService {
                 .toList();
     }
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private String displayName(UserEntity user) {
         if (user.getFirstName() != null && !user.getFirstName().isBlank()) {
             return user.getFirstName();

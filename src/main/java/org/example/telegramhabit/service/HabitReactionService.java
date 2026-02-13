@@ -17,8 +17,12 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+// Что делает: описывает ключевой компонент backend-слоя приложения.
+// Как делает: объявляет структуру и контракт, который используют остальные части системы.
 public class HabitReactionService {
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private static final Set<String> ALLOWED_EMOJI = Set.of("🔥", "💪", "👏", "❤️", "🎯", "🚀");
 
     private final HabitReactionRepository habitReactionRepository;
@@ -26,6 +30,8 @@ public class HabitReactionService {
     private final HabitService habitService;
 
     @Transactional(readOnly = true)
+    // Что делает: читает и возвращает данные для API или внутренней логики.
+    // Как делает: делает запрос к репозиторию, при необходимости фильтрует и маппит результат.
     public List<HabitReactionSummaryResponse> listForFriendHabit(UserEntity currentUser, UUID friendId, UUID habitId) {
         UserEntity friend = friendService.requireFriend(currentUser, friendId);
         HabitEntity habit = habitService.requireOwnedHabit(friend, habitId);
@@ -33,6 +39,8 @@ public class HabitReactionService {
     }
 
     @Transactional
+    // Что делает: преобразует или обновляет данные по правилам сервиса.
+    // Как делает: применяет правила преобразования, затем сохраняет или возвращает обновлённые данные.
     public List<HabitReactionSummaryResponse> toggleForFriendHabit(UserEntity currentUser, UUID friendId, UUID habitId, String emoji) {
         UserEntity friend = friendService.requireFriend(currentUser, friendId);
         HabitEntity habit = habitService.requireOwnedHabit(friend, habitId);
@@ -56,6 +64,8 @@ public class HabitReactionService {
     }
 
     @Transactional
+    // Что делает: удаляет данные по условиям метода с учётом связей.
+    // Как делает: проверяет доступ и существование сущности, затем удаляет связанные и целевые записи.
     public List<HabitReactionSummaryResponse> removeForFriendHabit(UserEntity currentUser, UUID friendId, UUID habitId, String emoji) {
         UserEntity friend = friendService.requireFriend(currentUser, friendId);
         HabitEntity habit = habitService.requireOwnedHabit(friend, habitId);
@@ -67,6 +77,8 @@ public class HabitReactionService {
         return summary(currentUser, habit);
     }
 
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
     private List<HabitReactionSummaryResponse> summary(UserEntity currentUser, HabitEntity habit) {
         Set<String> mine = habitReactionRepository.findByHabitAndReactor(habit, currentUser).stream()
                 .map(HabitReactionEntity::getEmoji)
@@ -79,6 +91,8 @@ public class HabitReactionService {
                 .toList();
     }
 
+    // Что делает: преобразует или обновляет данные по правилам сервиса.
+    // Как делает: применяет правила преобразования, затем сохраняет или возвращает обновлённые данные.
     private String normalizeEmoji(String emoji) {
         if (emoji == null) {
             throw new IllegalArgumentException("Emoji is required");
