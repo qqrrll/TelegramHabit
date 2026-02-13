@@ -1,24 +1,22 @@
 package org.example.telegramhabit.dto;
 
-import org.example.telegramhabit.entity.ActivityType;
+import org.example.telegramhabit.entity.NotificationType;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 // Что делает: описывает ключевой компонент backend-слоя приложения.
 // Как делает: объявляет структуру и контракт, который используют остальные части системы.
-public record ActivityResponse(
+public record NotificationResponse(
         UUID id,
-        UUID habitId,
-        UUID userId,
+        NotificationType type,
+        String message,
+        boolean read,
+        UUID activityId,
+        UUID actorUserId,
         String actorName,
         String actorPhotoUrl,
-        boolean ownEvent,
-        ActivityType type,
-        String message,
         LocalDateTime createdAt,
-        long createdAtEpochMs,
-        List<ActivityReactionSummaryResponse> reactions
+        long createdAtEpochMs
 ) {
 }

@@ -1,10 +1,12 @@
 import type {
+  ActivityReactionSummaryResponse,
   AuthResponse,
   FriendInviteResponse,
   FriendResponse,
   HabitReactionSummaryResponse,
   HabitResponse,
   HabitStatsResponse,
+  NotificationResponse,
   UserProfileResponse
 } from "./types";
 
@@ -177,4 +179,27 @@ export function toggleHabitReaction(friendId: string, habitId: string, emoji: st
     method: "POST",
     body: JSON.stringify({ emoji })
   });
+}
+
+export function toggleActivityReaction(activityId: string, emoji: string): Promise<ActivityReactionSummaryResponse[]> {
+  return apiRequest<ActivityReactionSummaryResponse[]>(`/api/activity/${activityId}/reactions`, {
+    method: "POST",
+    body: JSON.stringify({ emoji })
+  });
+}
+
+export function getNotifications(): Promise<NotificationResponse[]> {
+  return apiRequest<NotificationResponse[]>("/api/notifications");
+}
+
+export function getUnreadNotificationsCount(): Promise<{ count: number }> {
+  return apiRequest<{ count: number }>("/api/notifications/unread-count");
+}
+
+export function markAllNotificationsRead(): Promise<void> {
+  return apiRequest<void>("/api/notifications/read-all", { method: "PATCH" });
+}
+
+export function markNotificationRead(notificationId: string): Promise<void> {
+  return apiRequest<void>(`/api/notifications/${notificationId}/read`, { method: "PATCH" });
 }

@@ -2,6 +2,7 @@ package org.example.telegramhabit.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.telegramhabit.dto.ActivityResponse;
+import org.example.telegramhabit.dto.ActivityReactionSummaryResponse;
 import org.example.telegramhabit.entity.ActivityLogEntity;
 import org.example.telegramhabit.entity.ActivityType;
 import org.example.telegramhabit.entity.HabitEntity;
@@ -13,7 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -24,6 +27,7 @@ public class ActivityService {
 
     private final ActivityLogRepository activityLogRepository;
     private final FriendService friendService;
+    private final ActivityReactionService activityReactionService;
 
     @Transactional
     // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
@@ -47,7 +51,11 @@ public class ActivityService {
         feedUsers.add(user);
         feedUsers.addAll(friendService.friendsOf(user));
 
-        return activityLogRepository.findTop100ByUserInOrderByCreatedAtDesc(feedUsers).stream()
+        List<ActivityLogEntity> logs = activityLogRepository.findTop100ByUserInOrderByCreatedAtDesc(feedUsers);
+        List<UUID> activityIds = logs.stream().map(ActivityLogEntity::getId).toList();
+        Map<UUID, List<ActivityReactionSummaryResponse>> reactionsByActivity = activityReactionService.summary(activityIds, user);
+
+        return logs.stream()
                 .map(log -> new ActivityResponse(
                         log.getId(),
                         log.getHabit() != null ? log.getHabit().getId() : null,
@@ -58,7 +66,8 @@ public class ActivityService {
                         log.getType(),
                         log.getMessage(),
                         log.getCreatedAt(),
-                        log.getCreatedAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                        log.getCreatedAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+                        reactionsByActivity.getOrDefault(log.getId(), Collections.emptyList())
                 ))
                 .toList();
     }

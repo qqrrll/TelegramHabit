@@ -1,60 +1,62 @@
 package org.example.telegramhabit.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.telegramhabit.dto.ActivityReactionRequest;
-import org.example.telegramhabit.dto.ActivityReactionSummaryResponse;
-import org.example.telegramhabit.dto.ActivityResponse;
+import org.example.telegramhabit.dto.NotificationResponse;
 import org.example.telegramhabit.entity.UserEntity;
 import org.example.telegramhabit.security.SecurityUtils;
-import org.example.telegramhabit.service.ActivityReactionService;
-import org.example.telegramhabit.service.ActivityService;
+import org.example.telegramhabit.service.NotificationService;
 import org.example.telegramhabit.service.UserService;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import jakarta.validation.Valid;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/activity")
+@RequestMapping("/api/notifications")
 // Что делает: описывает ключевой компонент backend-слоя приложения.
 // Как делает: объявляет структуру и контракт, который используют остальные части системы.
-public class ActivityController {
+public class NotificationController {
 
-    private final ActivityService activityService;
-    private final ActivityReactionService activityReactionService;
+    private final NotificationService notificationService;
     private final UserService userService;
 
     @GetMapping
     // Что делает: читает и возвращает данные для API или внутренней логики.
     // Как делает: делает запрос к репозиторию, при необходимости фильтрует и маппит результат.
-    public List<ActivityResponse> list() {
-        UserEntity user = userService.requireById(SecurityUtils.currentUserId());
-        return activityService.list(user);
+    public List<NotificationResponse> list() {
+        return notificationService.list(currentUser());
     }
 
-    @GetMapping("/{activityId}/reactions")
+    @GetMapping("/unread-count")
     // Что делает: читает и возвращает данные для API или внутренней логики.
     // Как делает: делает запрос к репозиторию, при необходимости фильтрует и маппит результат.
-    public List<ActivityReactionSummaryResponse> reactions(@PathVariable UUID activityId) {
-        UserEntity user = userService.requireById(SecurityUtils.currentUserId());
-        return activityReactionService.listForActivity(user, activityId);
+    public Map<String, Long> unreadCount() {
+        return Map.of("count", notificationService.unreadCount(currentUser()));
     }
 
-    @PostMapping("/{activityId}/reactions")
+    @PatchMapping("/read-all")
     // Что делает: преобразует или обновляет данные по правилам сервиса.
     // Как делает: применяет правила преобразования, затем сохраняет или возвращает обновлённые данные.
-    public List<ActivityReactionSummaryResponse> toggleReaction(
-            @PathVariable UUID activityId,
-            @Valid @RequestBody ActivityReactionRequest request
-    ) {
-        UserEntity user = userService.requireById(SecurityUtils.currentUserId());
-        return activityReactionService.toggleForActivity(user, activityId, request.emoji());
+    public void readAll() {
+        notificationService.markAllRead(currentUser());
+    }
+
+    @PatchMapping("/{notificationId}/read")
+    // Что делает: преобразует или обновляет данные по правилам сервиса.
+    // Как делает: применяет правила преобразования, затем сохраняет или возвращает обновлённые данные.
+    public void readOne(@PathVariable UUID notificationId) {
+        notificationService.markRead(currentUser(), notificationId);
+    }
+
+    // Что делает: выполняет бизнес-операцию метода и возвращает ожидаемый результат.
+    // Как делает: выполняет шаги бизнес-логики по месту и возвращает итоговое значение.
+    private UserEntity currentUser() {
+        return userService.requireById(SecurityUtils.currentUserId());
     }
 }

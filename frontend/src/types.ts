@@ -41,6 +41,7 @@ export interface ActivityResponse {
   message: string;
   createdAt: string;
   createdAtEpochMs: number;
+  reactions: ActivityReactionSummaryResponse[];
 }
 
 export interface FriendResponse {
@@ -79,6 +80,25 @@ export interface HabitReactionSummaryResponse {
   emoji: string;
   count: number;
   mine: boolean;
+}
+
+export interface ActivityReactionSummaryResponse {
+  emoji: string;
+  count: number;
+  mine: boolean;
+}
+
+export interface NotificationResponse {
+  id: string;
+  type: "REACTION";
+  message: string;
+  read: boolean;
+  activityId: string | null;
+  actorUserId: string;
+  actorName: string;
+  actorPhotoUrl: string | null;
+  createdAt: string;
+  createdAtEpochMs: number;
 }
 
 export interface UserProfileResponse {

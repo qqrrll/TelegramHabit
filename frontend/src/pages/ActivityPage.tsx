@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState, type TouchEventHandler } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { apiRequest, resolveAssetUrl } from "../api";
+import { apiRequest, resolveAssetUrl, toggleActivityReaction } from "../api";
 import { hapticImpact } from "../telegram";
 import { SkeletonList } from "../components/Skeleton";
 import type { ActivityResponse } from "../types";
 
 type FeedFilter = "all" | "mine" | "friends";
+const reactionButtons = ["🔥", "💪", "👏", "❤️", "🎯", "🚀"] as const;
 
 function groupByDate(items: ActivityResponse[]): Array<{ date: string; items: ActivityResponse[] }> {
   const map = new Map<string, ActivityResponse[]>();
@@ -54,6 +55,16 @@ export function ActivityPage() {
       setError((e as Error).message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const onReact = async (activityId: string, emoji: string) => {
+    try {
+      hapticImpact("light");
+      const updated = await toggleActivityReaction(activityId, emoji);
+      setItems((prev) => prev.map((item) => (item.id === activityId ? { ...item, reactions: updated } : item)));
+    } catch (e) {
+      setError((e as Error).message);
     }
   };
 
@@ -154,6 +165,25 @@ export function ActivityPage() {
                   <time className="text-xs text-slate-400">{relativeTime(item.createdAtEpochMs, i18n.language)}</time>
                 </div>
                 <p className="mt-3 text-sm font-medium text-slate-700">{item.message}</p>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {reactionButtons.map((emoji) => {
+                    const reaction = item.reactions.find((r) => r.emoji === emoji);
+                    const count = reaction?.count ?? 0;
+                    const mine = reaction?.mine ?? false;
+                    return (
+                      <button
+                        key={emoji}
+                        type="button"
+                        onClick={() => void onReact(item.id, emoji)}
+                        className={`tap rounded-full px-2 py-1 text-xs font-semibold transition-all duration-200 ${
+                          mine ? "bg-ink text-white" : "bg-white/90 text-slate-600"
+                        }`}
+                      >
+                        {emoji} {count > 0 ? count : ""}
+                      </button>
+                    );
+                  })}
+                </div>
                 {item.habitId && (
                   <div className="mt-2">
                     <Link

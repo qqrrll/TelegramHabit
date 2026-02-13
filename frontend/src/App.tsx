@@ -1,7 +1,8 @@
 import { Link, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "./auth";
+import { getUnreadNotificationsCount } from "./api";
 import { ActivityPage } from "./pages/ActivityPage";
 import { FriendsPage } from "./pages/FriendsPage";
 import { FriendHabitStatsPage } from "./pages/FriendHabitStatsPage";
@@ -9,6 +10,7 @@ import { FriendProfilePage } from "./pages/FriendProfilePage";
 import { HabitFormPage } from "./pages/HabitFormPage";
 import { HabitStatsPage } from "./pages/HabitStatsPage";
 import { HomePage } from "./pages/HomePage";
+import { NotificationsPage } from "./pages/NotificationsPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { SkeletonCard } from "./components/Skeleton";
 import { isStartParamHandled, readStartParam } from "./telegram";
@@ -31,8 +33,16 @@ function StartParamRouter() {
 function Navigation() {
   const location = useLocation();
   const { t } = useTranslation();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    getUnreadNotificationsCount()
+      .then((resp) => setUnreadCount(resp.count))
+      .catch(() => setUnreadCount(0));
+  }, [location.pathname]);
+
   const itemClass = (active: boolean) =>
-    `tap flex-1 rounded-2xl px-2 py-2 text-center text-xs font-semibold transition-all duration-200 ${
+    `tap relative flex-1 rounded-2xl px-2 py-2 text-center text-xs font-semibold transition-all duration-200 ${
       active ? "bg-white/90 text-ink" : "text-slate-500"
     }`;
 
@@ -49,6 +59,14 @@ function Navigation() {
       </Link>
       <Link className={itemClass(location.pathname.startsWith("/friends"))} to="/friends">
         {t("friends")}
+      </Link>
+      <Link className={itemClass(location.pathname.startsWith("/notifications"))} to="/notifications">
+        {t("notifications")}
+        {unreadCount > 0 && (
+          <span className="absolute right-1 top-1 inline-grid min-h-4 min-w-4 place-items-center rounded-full bg-rose-500 px-1 text-[10px] text-white">
+            {unreadCount > 9 ? "9+" : unreadCount}
+          </span>
+        )}
       </Link>
       <Link className={itemClass(location.pathname.startsWith("/profile"))} to="/profile">
         {t("profile")}
@@ -100,6 +118,7 @@ export default function App() {
           <Route path="/friends" element={<FriendsPage />} />
           <Route path="/friends/:friendId" element={<FriendProfilePage />} />
           <Route path="/friends/:friendId/habits/:habitId/stats" element={<FriendHabitStatsPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
